@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,6 +12,18 @@
          url('/fonts/Boxing-Regular.woff') format('woff'),
          url('/fonts/Boxing-Regular.ttf') format('truetype');
     font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'PilcrowRounded-Semibold';
+    src: url('/fonts/PilcrowRounded-Semibold.eot');
+    src: url('/fonts/PilcrowRounded-Semibold.eot?#iefix') format('embedded-opentype'),
+         url('/fonts/PilcrowRounded-Semibold.woff2') format('woff2'),
+         url('/fonts/PilcrowRounded-Semibold.woff') format('woff'),
+         url('/fonts/PilcrowRounded-Semibold.ttf') format('truetype');
+    font-weight: 600;
     font-style: normal;
     font-display: swap;
   }

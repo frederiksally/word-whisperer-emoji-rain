@@ -4,12 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { LeaderboardPromptDialog } from './LeaderboardPromptDialog';
 import { LeaderboardDisplay } from './LeaderboardDisplay';
-import { useGameLogic, MAX_ROUNDS } from '@/hooks/useGameLogic';
+import { useGameLogic, MAX_ROUNDS, MAX_GUESSES_PER_ROUND } from '@/hooks/useGameLogic';
 import { useAIAgent } from '@/hooks/useAIAgent';
 import { GameUI } from './game/GameUI';
 import { useSound } from '@/contexts/SoundContext';
 import { usePrevious } from '@/hooks/usePrevious';
 import { useGameToast } from '@/contexts/GameToastContext';
+import { GameScore } from './game/GameScore';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
@@ -27,12 +28,16 @@ export const ConversationalAgent = () => {
     },
   });
 
-  const { guessedWords, wordToGuess, gameStatus, roundNumber, showLeaderboardDisplay, matchId, currentWord } = states;
+  const { guessedWords, wordToGuess, gameStatus, roundNumber, showLeaderboardDisplay, matchId, currentWord, totalScore } = states;
   const prevGuessedWords = usePrevious(guessedWords) ?? [];
   const prevGameStatus = usePrevious(gameStatus);
   const prevShowLeaderboardDisplay = usePrevious(showLeaderboardDisplay);
   const prevMatchId = usePrevious(matchId);
   const prevCurrentWord = usePrevious(currentWord);
+
+  const attemptsText = gameStatus === 'playing'
+    ? `${guessedWords.length} / ${MAX_GUESSES_PER_ROUND}`
+    : `${guessedWords.length}`;
 
   // Toast on new category
   useEffect(() => {
@@ -168,6 +173,11 @@ export const ConversationalAgent = () => {
         </div>
       ) : (
         <div className="w-full h-full flex flex-col">
+            <GameScore 
+                totalScore={totalScore}
+                roundNumber={roundNumber}
+                attemptsText={attemptsText}
+            />
             <header className="flex-shrink-0 py-2 px-8 border-b flex justify-between items-center">
                 <div>
                     <h1 className="text-xl font-bold">Word Guessing Game</h1>

@@ -21,6 +21,7 @@ export default {
 		extend: {
       fontFamily: {
         boxing: ['"Boxing"', 'sans-serif'],
+        pilcrow: ['"PilcrowRounded-Semibold"', 'sans-serif'],
       },
 			colors: {
 				border: 'hsl(var(--border))',
