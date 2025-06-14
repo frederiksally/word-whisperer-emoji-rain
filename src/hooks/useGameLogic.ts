@@ -52,17 +52,15 @@ export const useGameLogic = () => {
     const { data, error } = await supabase.rpc('get_random_word');
     if (error || !data || data.length === 0) {
       console.error('Failed to fetch new word, using fallback.', error);
-      toast.error("Couldn't fetch a word. Using a default one.");
       const fallbackWord = { id: 'fallback-id', word: 'lovable', category: 'Adjective' };
       setCurrentWord(fallbackWord);
       return fallbackWord;
     }
     const newWord = data[0];
     const wordData = { id: newWord.id, word: newWord.word, category: newWord.category };
-    toast.info(`Round ${roundNumber}: The new category is "${wordData.category}"`);
     setCurrentWord(wordData);
     return wordData;
-  }, [roundNumber]);
+  }, []);
 
   const startNewRoundLogic = useCallback(async (currentMatchId: string, currentRoundNumber: number) => {
     resetRoundState();
@@ -77,7 +75,6 @@ export const useGameLogic = () => {
             .single();
         if (error || !data) {
             console.error('Failed to create game session', error);
-            toast.error("Couldn't start the round. Please try again.");
             return null;
         }
         setCurrentSessionId(data.id);
