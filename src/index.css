@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  @font-face {
+    font-family: 'Boxing';
+    src: url('/fonts/Boxing-Regular.eot');
+    src: url('/fonts/Boxing-Regular.eot?#iefix') format('embedded-opentype'),
+         url('/fonts/Boxing-Regular.woff2') format('woff2'),
+         url('/fonts/Boxing-Regular.woff') format('woff'),
+         url('/fonts/Boxing-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
 
 @layer base {

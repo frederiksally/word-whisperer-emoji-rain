@@ -4,7 +4,6 @@ import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { LeaderboardPromptDialog } from './LeaderboardPromptDialog';
 import { LeaderboardDisplay } from './LeaderboardDisplay';
 import { useGameLogic, MAX_ROUNDS } from '@/hooks/useGameLogic';
@@ -132,7 +131,7 @@ export const ConversationalAgent = () => {
   }
   
   return (
-    <Card className="w-full max-w-lg mx-auto">
+    <div className="w-full h-screen flex flex-col">
       <LeaderboardPromptDialog
         isOpen={states.showLeaderboardPrompt}
         totalScore={states.totalScore}
@@ -141,35 +140,42 @@ export const ConversationalAgent = () => {
           setters.setShowLeaderboardDisplay(true);
         }}
       />
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Word Guessing Game</CardTitle>
-        <CardDescription className="text-center text-muted-foreground">
-          Talk to our AI agent to guess the secret word!
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col items-center justify-center gap-6 p-6">
-        <div className="text-sm font-mono p-2 bg-muted rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
-        
-        {!states.matchId ? (
-            <Button onClick={() => { playSound('buttonClick'); handleStartConversation(); }} disabled={isConnecting}>
+
+      {!states.matchId ? (
+         <div className="flex-grow flex flex-col items-center justify-center gap-6 p-6">
+            <h1 className="text-4xl font-bold font-boxing tracking-wider">Word Guessing Game</h1>
+            <p className="text-muted-foreground max-w-md text-center">
+              Talk to our AI agent to guess the secret word! Press Start Game and allow microphone access to begin.
+            </p>
+            <div className="text-sm font-mono p-2 bg-muted rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
+            <Button onClick={() => { playSound('buttonClick'); handleStartConversation(); }} disabled={isConnecting} size="lg">
                 {isConnecting ? 'Starting...' : 'Start Game'}
             </Button>
-        ) : (
-          <>
-            {!isConnected ? (
-                <div className="text-center p-8">
-                    <p className="text-2xl font-bold">Connecting to agent...</p>
+        </div>
+      ) : (
+        <div className="w-full h-full flex flex-col">
+            <header className="flex-shrink-0 py-2 px-8 border-b flex justify-between items-center">
+                <div>
+                    <h1 className="text-xl font-bold">Word Guessing Game</h1>
+                    <p className="text-sm text-muted-foreground">Round {states.roundNumber} of {MAX_ROUNDS}</p>
                 </div>
-            ) : (
-              <GameUI 
-                gameLogic={gameLogic} 
-                lastUserTranscript={lastUserTranscript}
-                handleStopConversation={handleStopConversation}
-              />
-            )}
-          </>
-        )}
-      </CardContent>
-    </Card>
+                <div className="text-sm font-mono p-2 bg-muted rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
+            </header>
+            <main className="flex-grow overflow-hidden">
+                 {!isConnected ? (
+                    <div className="text-center h-full flex flex-col items-center justify-center">
+                        <p className="text-2xl font-bold">Connecting to agent...</p>
+                    </div>
+                ) : (
+                  <GameUI 
+                    gameLogic={gameLogic} 
+                    lastUserTranscript={lastUserTranscript}
+                    handleStopConversation={handleStopConversation}
+                  />
+                )}
+            </main>
+        </div>
+      )}
+    </div>
   );
 };
