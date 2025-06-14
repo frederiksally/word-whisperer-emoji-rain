@@ -139,10 +139,9 @@ export const ConversationalAgent = () => {
       if (!data.url) throw new Error('No URL returned from edge function.');
 
       console.log('Received signed URL. Starting session...');
-      // 3. Start the conversation session with agentId and signedUrl
+      // 3. Start the conversation session with the signed URL
       await startSession({ 
-        agentId: 'agent_01jxq0rwajewgtkkwf36qefp7w',
-        signedUrl: data.url 
+        url: data.url 
       });
       console.log('Session started.');
     } catch (error) {
