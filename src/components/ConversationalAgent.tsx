@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,10 @@ export const ConversationalAgent = () => {
   const [score, setScore] = useState(0);
 
   const wordToGuess = useMemo(() => currentWord?.word.toLowerCase() ?? '', [currentWord]);
+
+  // Create a ref to hold the latest state, so we can pass stable callbacks
+  const gameStateRef = useRef({ guessedWords, gameStatus, score, wordToGuess, currentWord });
+  gameStateRef.current = { guessedWords, gameStatus, score, wordToGuess, currentWord };
 
   const resetGame = () => {
     setGuessedWords([]);
@@ -54,6 +58,7 @@ export const ConversationalAgent = () => {
   const clientTools = useMemo(() => ({
     submitGuess: ({ word }: { word: string }) => {
       console.log(`submitGuess called with word: "${word}"`); // For debugging
+      const { wordToGuess, gameStatus, guessedWords: currentGuessedWords } = gameStateRef.current;
 
       if (gameStatus === 'won') {
         return `The game is already over, the user won. The word was "${wordToGuess}". Instruct the user to say "new game" to play again.`;
@@ -68,7 +73,7 @@ export const ConversationalAgent = () => {
           return "The user didn't say a clear word. Ask them to guess again.";
       }
 
-      if (guessedWords.includes(normalizedWord)) {
+      if (currentGuessedWords.includes(normalizedWord)) {
         toast.info(`You already guessed "${normalizedWord}"`);
         return `The user already guessed the word ${normalizedWord}. Tell them to guess another word.`;
       }
@@ -76,7 +81,7 @@ export const ConversationalAgent = () => {
       setGuessedWords(prevGuessedWords => [...prevGuessedWords, normalizedWord]);
 
       if (normalizedWord === wordToGuess) {
-        const finalScore = Math.max(0, 100 - guessedWords.length * 10);
+        const finalScore = Math.max(0, 100 - currentGuessedWords.length * 10);
         setScore(finalScore);
         setGameStatus('won');
         toast.success(`You guessed it! The word was "${wordToGuess}"! You scored ${finalScore} points.`);
@@ -87,6 +92,8 @@ export const ConversationalAgent = () => {
       }
     },
     getGameStatus: () => {
+      const { wordToGuess, gameStatus, score, guessedWords: currentGuessedWords, currentWord } = gameStateRef.current;
+
       if (!wordToGuess) {
         return "The game is loading. I'm picking a word.";
       }
@@ -94,11 +101,11 @@ export const ConversationalAgent = () => {
         return `The game is already won. The word was "${wordToGuess}". The final score was ${score}. The user can start a new game by asking to reset.`;
       }
 
-      if (guessedWords.length === 0) {
+      if (currentGuessedWords.length === 0) {
         return `The game has just started. The user has not made any guesses yet. The word to guess has ${wordToGuess.length} letters. The category is "${currentWord?.category}". Encourage the user to make their first guess.`;
       }
       
-      return `The user has made ${guessedWords.length} guesses. The incorrect guesses are: ${guessedWords.filter(w => w !== wordToGuess).join(', ')}. The word has ${wordToGuess.length} letters. The category is "${currentWord?.category}". Encourage them to guess again.`;
+      return `The user has made ${currentGuessedWords.length} guesses. The incorrect guesses are: ${currentGuessedWords.filter(w => w !== wordToGuess).join(', ')}. The word has ${wordToGuess.length} letters. The category is "${currentWord?.category}". Encourage them to guess again.`;
     },
     resetGame: async () => {
       resetGame();
@@ -106,7 +113,7 @@ export const ConversationalAgent = () => {
       const newWordData = await fetchNewWord();
       return `The game has been reset. I am thinking of a new word. The category is "${newWordData.category}". It has ${newWordData.word.length} letters. Encourage the user to make their first guess.`;
     }
-  }), [guessedWords, gameStatus, score, wordToGuess, currentWord]);
+  }), []); // Using an empty dependency array to make the tools object stable
 
   const { startSession, endSession, status } = useConversation({
     onMessage: (message) => {
