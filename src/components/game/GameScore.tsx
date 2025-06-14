@@ -35,19 +35,19 @@ export const GameScore = ({ totalScore, roundNumber, attemptsText }: GameScorePr
   }, []);
 
   return (
-    <div className="fixed top-4 right-4 p-4 font-pilcrow text-white bg-black/50 backdrop-blur-sm border-2 border-white rounded-lg shadow-xl z-50 text-center w-48">
-        <div className="mb-2">
-            <p className="text-sm uppercase tracking-widest text-white/80">Total Score</p>
-            <p ref={scoreRef} className="text-4xl font-bold">{totalScore}</p>
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-                <p className="uppercase tracking-wider text-white/80">Round</p>
-                <p className="text-lg font-bold">{roundNumber} / {MAX_ROUNDS}</p>
+    <div className="fixed top-4 right-4 p-4 font-pilcrow text-white border-2 border-white rounded-lg shadow-xl z-50">
+        <div className="flex items-center justify-center divide-x-2 divide-white/30">
+            <div className="text-center px-8">
+                <p className="text-sm uppercase tracking-widest text-white/80">Total Score</p>
+                <p ref={scoreRef} className="text-5xl font-bold">{totalScore}</p>
             </div>
-            <div>
-                <p className="uppercase tracking-wider text-white/80">Attempts</p>
-                <p className="text-lg font-bold">{attemptsText}</p>
+            <div className="text-center px-8">
+                <p className="text-sm uppercase tracking-wider text-white/80">Round</p>
+                <p className="text-5xl font-bold">{roundNumber}<span className="text-3xl opacity-75"> / {MAX_ROUNDS}</span></p>
+            </div>
+            <div className="text-center px-8">
+                <p className="text-sm uppercase tracking-wider text-white/80">Attempts</p>
+                <p className="text-5xl font-bold">{attemptsText}</p>
             </div>
         </div>
     </div>
