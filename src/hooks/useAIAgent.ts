@@ -1,0 +1,152 @@
+
+import { useMemo, useRef } from 'react';
+import { useConversation } from '@11labs/react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { MAX_ROUNDS, MAX_GUESSES_PER_ROUND } from './useGameLogic';
+
+// This hook requires the return value of useGameLogic as an argument
+export const useAIAgent = (gameLogic: any) => {
+  const { states, setters, actions } = gameLogic;
+  const {
+    currentWord, guessedWords, gameStatus, score, totalScore, roundNumber,
+    matchId, currentSessionId, wordToGuess,
+  } = states;
+
+  const gameStateRef = useRef(states);
+  gameStateRef.current = states;
+
+  const clientTools = useMemo(() => ({
+    submitGuess: async ({ word }: { word: string }) => {
+      const currentState = gameStateRef.current;
+      const { wordToGuess, gameStatus, guessedWords, currentSessionId, roundNumber, totalScore } = currentState;
+
+      if (gameStatus === 'won' || gameStatus === 'lost') {
+        return `The round is already over. The word was "${wordToGuess}". Ask the user if they are ready for the next round. If they give an affirmative answer, call the startNextRound tool.`;
+      }
+      if (!wordToGuess || !currentSessionId) {
+        return "I'm still thinking of a word. Please give me a moment.";
+      }
+      
+      const normalizedWord = word.toLowerCase().trim();
+      if (!normalizedWord) {
+          return "The user didn't say a clear word. Ask them to guess again.";
+      }
+      if (guessedWords.includes(normalizedWord)) {
+        toast.info(`You already guessed "${normalizedWord}"`);
+        return `The user already guessed the word ${normalizedWord}. Tell them to guess another word.`;
+      }
+
+      const newGuessedWords = [...guessedWords, normalizedWord];
+      setters.setGuessedWords(newGuessedWords);
+
+      const updatePayload = {
+          attempts: newGuessedWords.length,
+          status: 'completed' as const,
+          end_time: new Date().toISOString(),
+      };
+
+      if (normalizedWord === wordToGuess) {
+        const roundScore = Math.max(0, 100 - guessedWords.length * 10);
+        const newTotalScore = totalScore + roundScore;
+        setters.setScore(roundScore);
+        setters.setTotalScore(newTotalScore);
+        setters.setGameStatus('won');
+        toast.success(`You guessed it! The word was "${wordToGuess}"! You scored ${roundScore} points.`);
+
+        await supabase.from('game_sessions').update({ ...updatePayload, score: roundScore, correct_guess: wordToGuess }).eq('id', currentSessionId);
+
+        if (roundNumber < MAX_ROUNDS) {
+            return `The user's guess "${normalizedWord}" was CORRECT. They won the round and scored ${roundScore} points. Their total score is now ${newTotalScore}. Now, ask them if they are ready for the next round. If they give an affirmative answer, you MUST call the startNextRound tool.`;
+        } else {
+            actions.endGameAndCheckLeaderboard(newTotalScore);
+            return `The user's guess "${normalizedWord}" was CORRECT. They won the final round, scoring ${roundScore} points. This was the last round! Tell them the game is over and their final total score is ${newTotalScore}. The application will now show them the leaderboard results.`;
+        }
+      } else {
+        if (newGuessedWords.length >= MAX_GUESSES_PER_ROUND) {
+            setters.setGameStatus('lost');
+            toast.error(`Too many guesses! The word was "${wordToGuess}".`);
+            await supabase.from('game_sessions').update(updatePayload).eq('id', currentSessionId);
+            if (roundNumber < MAX_ROUNDS) {
+                return `The user ran out of guesses. The round is over. The word was "${wordToGuess}". Tell them not to worry, and ask if they are ready for the next round. If they give an affirmative answer, you MUST call the startNextRound tool.`;
+            } else {
+                actions.endGameAndCheckLeaderboard(totalScore);
+                return `The user ran out of guesses on the final round. The game is over. The word was "${wordToGuess}". Tell them their final score is ${totalScore}, and the application will now show them the leaderboard results.`;
+            }
+        } else {
+            toast.error(`"${normalizedWord}" is not the word. Try again!`);
+            const guessesLeft = MAX_GUESSES_PER_ROUND - newGuessedWords.length;
+            return `The user's guess "${normalizedWord}" was INCORRECT. They have ${guessesLeft} guesses left for this round. Encourage them to try again and give them a clever hint.`;
+        }
+      }
+    },
+    getGameStatus: () => {
+      const { wordToGuess, gameStatus, guessedWords, currentWord, roundNumber, totalScore } = gameStateRef.current;
+
+      if (!matchId) {
+        return "The game hasn't started yet. The user needs to say 'start game'.";
+      }
+      if (gameStatus === 'won' || gameStatus === 'lost') {
+        return `The round is over. The word was "${wordToGuess}". The user's total score is ${totalScore}. The user can start the next round by saying "next word" or see the leaderboard if the game is over.`;
+      }
+      if (!wordToGuess) {
+        return "The game is loading. I'm picking a word.";
+      }
+      
+      const incorrectGuesses = guessedWords.filter(w => w !== wordToGuess).join(', ');
+      const guessesLeft = MAX_GUESSES_PER_ROUND - guessedWords.length;
+      
+      let statusReport = `The secret word is "${wordToGuess}". We are in round ${roundNumber} of ${MAX_ROUNDS}. The total score is ${totalScore}. The category is "${currentWord?.category}". The word has ${wordToGuess.length} letters. The user has ${guessesLeft} guesses left. `;
+
+      if (guessedWords.length === 0) {
+        statusReport += `The user has not made any guesses yet.`;
+      } else {
+        statusReport += `The incorrect guesses so far are: ${incorrectGuesses || 'none'}.`;
+      }
+      return statusReport;
+    },
+    resetGame: async () => {
+      const newMatchId = crypto.randomUUID();
+      actions.resetMatchState();
+      setters.setMatchId(newMatchId);
+      
+      const newWordData = await actions.startNewRoundLogic(newMatchId, 1);
+      if (!newWordData) {
+        return "Sorry, I couldn't think of a new word right now. Please try again in a moment.";
+      }
+      
+      toast.info("New game started!");
+      return `The secret word for you to know is "${newWordData.word}". Now, tell the user a new game has started. This is round 1 of ${MAX_ROUNDS}. The new word is from the category "${newWordData.category}" and has ${newWordData.word.length} letters. Encourage them to make their first guess.`;
+    },
+    startNextRound: async () => {
+      const { roundNumber, matchId, totalScore } = gameStateRef.current;
+      if (!matchId) {
+        return "The game hasn't started yet. The user needs to say 'start game' first.";
+      }
+      if (roundNumber >= MAX_ROUNDS) {
+          actions.endGameAndCheckLeaderboard(totalScore);
+          return `The game is already over. You have completed all ${MAX_ROUNDS} rounds. Tell the user their final score is ${totalScore} and the application will now show them the leaderboard results.`;
+      }
+
+      const nextRound = roundNumber + 1;
+      const newWordData = await actions.startNewRoundLogic(matchId, nextRound);
+      if (!newWordData) {
+          return "Sorry, I couldn't get a new word. Please ask the user to try again in a moment.";
+      }
+
+      return `The secret word for round ${nextRound} is "${newWordData.word}". Now, tell the user that round ${nextRound} is starting. The category is "${newWordData.category}" and the word has ${newWordData.word.length} letters.`;
+    }
+  }), [gameLogic]);
+
+  const { startSession, endSession, status } = useConversation({
+    clientTools,
+  });
+
+  return {
+    startSession,
+    endSession,
+    status,
+    clientTools,
+  };
+};
+
