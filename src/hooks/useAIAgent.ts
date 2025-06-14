@@ -9,7 +9,7 @@ type AIAgentConversationOptions = {
   onMessage?: (message: { source: string; message?: string; [key: string]: any }) => void;
   onConnect?: () => void;
   onDisconnect?: () => void;
-  onError?: (error: Error) => void;
+  onError?: (message: string, context?: any) => void;
   overrides?: any;
 };
 
