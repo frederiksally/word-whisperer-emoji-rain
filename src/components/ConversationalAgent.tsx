@@ -22,8 +22,11 @@ export const ConversationalAgent = () => {
     setScore(0);
   };
 
-  // Important: For this to work, you must configure a "Client Tool" in your
-  // ElevenLabs agent settings named "submitGuess" with one parameter: "word".
+  // Important: For this to work, you must configure "Client Tools" in your
+  // ElevenLabs agent settings. You'll need:
+  // - "submitGuess" with one parameter: "word".
+  // - "getGameStatus" with no parameters.
+  // - "resetGame" with no parameters.
   const { startSession, endSession, status } = useConversation({
     onMessage: (message) => {
       if (message.source === 'user' && message.message) {
@@ -57,6 +60,22 @@ export const ConversationalAgent = () => {
           return `The user guessed ${normalizedWord}, which is incorrect. Encourage them to try again.`;
         }
       },
+      getGameStatus: () => {
+        if (gameStatus === 'won') {
+          return `The game is already won. The word was "${wordToGuess}". The final score was ${score}. The user can start a new game by asking to reset.`;
+        }
+
+        if (guessedWords.length === 0) {
+          return `The game has just started. The user has not made any guesses yet. The word to guess has ${wordToGuess.length} letters. Encourage the user to make their first guess.`;
+        }
+        
+        return `The user has made ${guessedWords.length} guesses. The incorrect guesses are: ${guessedWords.filter(w => w !== wordToGuess).join(', ')}. The current score is ${score}. The word has ${wordToGuess.length} letters. Encourage them to guess again.`;
+      },
+      resetGame: () => {
+        resetGame();
+        toast.info("New game started!");
+        return "The game has been reset. Tell the user a new game is starting and that you are thinking of a new word. Encourage them to make their first guess.";
+      }
     },
   });
 
