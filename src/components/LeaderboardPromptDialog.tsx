@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useSound } from '@/contexts/SoundContext';
 
 import {
   AlertDialog,
@@ -36,6 +36,7 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LeaderboardFormValues>({
     resolver: zodResolver(leaderboardSchema),
   });
+  const { playSound } = useSound();
 
   const onSubmit = async (values: LeaderboardFormValues) => {
     const { error } = await supabase.from('match_leaderboard').insert({
@@ -53,6 +54,16 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
     }
   };
 
+  const handleFormSubmit = handleSubmit(async (values) => {
+    playSound('buttonClick');
+    await onSubmit(values);
+  });
+
+  const handleClose = () => {
+    playSound('buttonClick');
+    onClose();
+  }
+
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
@@ -63,7 +74,7 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
             Enter your name to be displayed on the leaderboard.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleFormSubmit} className="space-y-4">
           <div>
             <Label htmlFor="playerName">Player Name</Label>
             <Input id="playerName" {...register('playerName')} />
@@ -75,7 +86,7 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
           </div>
           <AlertDialogFooter>
-             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+             <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
                 Skip
             </Button>
             <AlertDialogAction type="submit" disabled={isSubmitting}>

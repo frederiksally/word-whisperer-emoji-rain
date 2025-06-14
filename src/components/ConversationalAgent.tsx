@@ -7,13 +7,16 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { LeaderboardPromptDialog } from './LeaderboardPromptDialog';
 import { LeaderboardDisplay } from './LeaderboardDisplay';
-import { useGameLogic } from '@/hooks/useGameLogic';
+import { useGameLogic, MAX_ROUNDS } from '@/hooks/useGameLogic';
 import { useAIAgent } from '@/hooks/useAIAgent';
 import { GameUI } from './game/GameUI';
+import { useSound } from '@/contexts/SoundContext';
+import { usePrevious } from '@/hooks/usePrevious';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [lastUserTranscript, setLastUserTranscript] = useState('');
+  const { playSound, playMusic, stopMusic } = useSound();
   
   const gameLogic = useGameLogic();
   const { states, actions, setters } = gameLogic;
@@ -24,6 +27,51 @@ export const ConversationalAgent = () => {
       }
     },
   });
+
+  const { guessedWords, wordToGuess, gameStatus, roundNumber, showLeaderboardDisplay, matchId } = states;
+  const prevGuessedWords = usePrevious(guessedWords) ?? [];
+  const prevGameStatus = usePrevious(gameStatus);
+  const prevShowLeaderboardDisplay = usePrevious(showLeaderboardDisplay);
+  const prevMatchId = usePrevious(matchId);
+
+  // Sound on new guess
+  useEffect(() => {
+    if (matchId && guessedWords.length > prevGuessedWords.length) {
+      const lastGuess = guessedWords[guessedWords.length - 1];
+      if (lastGuess === wordToGuess) {
+        playSound('guessCorrect');
+      } else {
+        playSound('guessIncorrect');
+      }
+    }
+  }, [guessedWords, prevGuessedWords, wordToGuess, playSound, matchId]);
+
+  // Sound on round end
+  useEffect(() => {
+    if (prevGameStatus === 'playing' && gameStatus !== 'playing') {
+      if (gameStatus === 'won') {
+        playSound('roundWin');
+        if (roundNumber === MAX_ROUNDS) {
+          playSound('gameWin');
+        }
+      } else if (gameStatus === 'lost') {
+        playSound('roundLose');
+      }
+    }
+  }, [gameStatus, prevGameStatus, roundNumber, playSound]);
+
+  // Handle music changes
+  useEffect(() => {
+    if (matchId && matchId !== prevMatchId) {
+      stopMusic(); // Stop any previous music
+      playSound('gameStart');
+      playMusic('roundMusic');
+    }
+    if (showLeaderboardDisplay && !prevShowLeaderboardDisplay) {
+      stopMusic();
+      playMusic('leaderboardMusic');
+    }
+  }, [matchId, prevMatchId, showLeaderboardDisplay, prevShowLeaderboardDisplay, playSound, playMusic, stopMusic]);
 
   const handleStartConversation = async () => {
     setIsConnecting(true);
@@ -56,6 +104,7 @@ export const ConversationalAgent = () => {
     if (endSession) endSession();
     actions.resetMatchState();
     setLastUserTranscript('');
+    stopMusic();
   };
 
   const handlePlayAgain = () => {
@@ -99,7 +148,7 @@ export const ConversationalAgent = () => {
         <div className="text-sm font-mono p-2 bg-muted rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
         
         {!states.matchId ? (
-            <Button onClick={handleStartConversation} disabled={isConnecting}>
+            <Button onClick={() => { playSound('buttonClick'); handleStartConversation(); }} disabled={isConnecting}>
                 {isConnecting ? 'Starting...' : 'Start Game'}
             </Button>
         ) : (

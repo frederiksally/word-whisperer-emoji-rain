@@ -1,12 +1,13 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Check } from 'lucide-react';
 import { MAX_ROUNDS, MAX_GUESSES_PER_ROUND } from '@/hooks/useGameLogic';
+import { useSound } from '@/contexts/SoundContext';
 
 export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation }: any) => {
     const { states } = gameLogic;
+    const { playSound } = useSound();
     const {
         totalScore, roundNumber, guessedWords, gameStatus,
         wordToGuess, currentWord, finalMessage,
@@ -70,7 +71,7 @@ export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation }
                 </p>
             </div>
             
-            <Button onClick={handleStopConversation} variant="destructive">
+            <Button onClick={() => { playSound('buttonClick'); handleStopConversation(); }} variant="destructive">
                 End Game
             </Button>
         </div>
