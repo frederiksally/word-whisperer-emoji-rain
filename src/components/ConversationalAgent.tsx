@@ -19,11 +19,16 @@ export const ConversationalAgent = () => {
       const { data, error } = await supabase.functions.invoke('elevenlabs-get-signed-url');
       if (error) throw error;
       if (!data.url) throw new Error('No URL returned from edge function.');
+      
+      const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
+      if (!agentId) {
+        throw new Error("VITE_ELEVENLABS_AGENT_ID is not set in the frontend environment variables.");
+      }
 
       console.log('Received signed URL. Starting session...');
       // 3. Start the conversation session
-      // FIX: Changed `url` to `authorization` to match the expected type for this library version.
-      await startSession({ authorization: data.url });
+      // FIX: Pass the required `agentId` along with the `authorization` token.
+      await startSession({ agentId, authorization: data.url });
       console.log('Session started.');
     } catch (error) {
       console.error('Failed to start conversation:', error);
@@ -56,3 +61,4 @@ export const ConversationalAgent = () => {
     </div>
   );
 };
+
