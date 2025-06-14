@@ -18,7 +18,7 @@ export const ConversationalAgent = () => {
   const { showToast } = useGameToast();
   
   const gameLogic = useGameLogic();
-  const { states, actions } = gameLogic;
+  const { states, actions, setters } = gameLogic;
   const { startSession, endSession, status, clientTools } = useAIAgent(gameLogic, {
     onMessage: (message) => {
       if (message.source === 'user' && message.message) {
@@ -150,8 +150,8 @@ export const ConversationalAgent = () => {
         isOpen={states.showLeaderboardPrompt}
         totalScore={states.totalScore}
         onClose={() => {
-          actions.setShowLeaderboardPrompt(false);
-          actions.setShowLeaderboardDisplay(true);
+          setters.setShowLeaderboardPrompt(false);
+          setters.setShowLeaderboardDisplay(true);
         }}
       />
 

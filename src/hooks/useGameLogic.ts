@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -135,13 +134,7 @@ export const useGameLogic = () => {
       finalMessage,
       wordToGuess,
     },
-    actions: {
-      resetMatchState,
-      resetRoundState,
-      fetchNewWord,
-      startNewRoundLogic,
-      endGameAndCheckLeaderboard,
-      startNewMatch,
+    setters: {
       setCurrentWord,
       setGuessedWords,
       setGameStatus,
@@ -153,6 +146,14 @@ export const useGameLogic = () => {
       setShowLeaderboardPrompt,
       setShowLeaderboardDisplay,
       setFinalMessage,
+    },
+    actions: {
+      resetMatchState,
+      resetRoundState,
+      fetchNewWord,
+      startNewRoundLogic,
+      endGameAndCheckLeaderboard,
+      startNewMatch,
     },
   };
 };
