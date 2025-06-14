@@ -141,7 +141,7 @@ export const ConversationalAgent = () => {
       console.log('Received signed URL. Starting session...');
       // 3. Start the conversation session with the signed URL
       await startSession({ 
-        url: data.url 
+        signedUrl: data.url 
       });
       console.log('Session started.');
     } catch (error) {
