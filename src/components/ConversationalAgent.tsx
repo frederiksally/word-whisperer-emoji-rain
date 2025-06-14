@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,19 +7,43 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { X, Check } from 'lucide-react';
 
+// Define the type for our word object
+type Word = {
+  word: string;
+  category: string | null;
+};
+
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
-  const [wordToGuess] = useState('lovable');
+  const [currentWord, setCurrentWord] = useState<Word | null>(null);
   const [guessedWords, setGuessedWords] = useState<string[]>([]);
   const [gameStatus, setGameStatus] = useState<'playing' | 'won'>('playing');
   const [lastUserTranscript, setLastUserTranscript] = useState('');
   const [score, setScore] = useState(0);
+
+  const wordToGuess = useMemo(() => currentWord?.word.toLowerCase() ?? '', [currentWord]);
 
   const resetGame = () => {
     setGuessedWords([]);
     setGameStatus('playing');
     setLastUserTranscript('');
     setScore(0);
+    setCurrentWord(null);
+  };
+
+  const fetchNewWord = async () => {
+    const { data, error } = await supabase.rpc('get_random_word');
+    if (error || !data || data.length === 0) {
+      console.error('Failed to fetch new word, using fallback.', error);
+      toast.error("Couldn't fetch a word. Using a default one.");
+      const fallbackWord = { word: 'lovable', category: 'Adjective' };
+      setCurrentWord(fallbackWord);
+      return fallbackWord;
+    }
+    const newWord = data[0];
+    const wordData = { word: newWord.word, category: newWord.category };
+    setCurrentWord(wordData);
+    return wordData;
   };
 
   // Important: For this to work, you must configure "Client Tools" in your
@@ -30,6 +53,9 @@ export const ConversationalAgent = () => {
   // - "resetGame" with no parameters.
   const clientTools = useMemo(() => ({
     submitGuess: ({ word }: { word: string }) => {
+      if (!wordToGuess) {
+        return "I'm still thinking of a word. Please give me a moment.";
+      }
       const normalizedWord = word.toLowerCase().trim();
       
       if (!normalizedWord) {
@@ -48,30 +74,34 @@ export const ConversationalAgent = () => {
         const finalScore = Math.max(0, 100 - (newGuessedWords.length - 1) * 10);
         setScore(finalScore);
         setGameStatus('won');
-        toast.success(`You guessed it! The word was "lovable"! You scored ${finalScore} points.`);
-        return `The user correctly guessed the word ${normalizedWord}. Congratulate them enthusiastically and tell them they scored ${finalScore} points.`;
+        toast.success(`You guessed it! The word was "${wordToGuess}"! You scored ${finalScore} points.`);
+        return `The user correctly guessed the word ${normalizedWord}. Congratulate them enthusiastically and tell them they scored ${finalScore} points. Also ask if they want to play again.`;
       } else {
         toast.error(`"${normalizedWord}" is not the word. Try again!`);
         return `The user guessed ${normalizedWord}, which is incorrect. Encourage them to try again.`;
       }
     },
     getGameStatus: () => {
+      if (!wordToGuess) {
+        return "The game is loading. I'm picking a word.";
+      }
       if (gameStatus === 'won') {
         return `The game is already won. The word was "${wordToGuess}". The final score was ${score}. The user can start a new game by asking to reset.`;
       }
 
       if (guessedWords.length === 0) {
-        return `The game has just started. The user has not made any guesses yet. The word to guess has ${wordToGuess.length} letters. Encourage the user to make their first guess.`;
+        return `The game has just started. The user has not made any guesses yet. The word to guess has ${wordToGuess.length} letters. The category is "${currentWord?.category}". Encourage the user to make their first guess.`;
       }
       
-      return `The user has made ${guessedWords.length} guesses. The incorrect guesses are: ${guessedWords.filter(w => w !== wordToGuess).join(', ')}. The current score is ${score}. The word has ${wordToGuess.length} letters. Encourage them to guess again.`;
+      return `The user has made ${guessedWords.length} guesses. The incorrect guesses are: ${guessedWords.filter(w => w !== wordToGuess).join(', ')}. The word has ${wordToGuess.length} letters. The category is "${currentWord?.category}". Encourage them to guess again.`;
     },
-    resetGame: () => {
+    resetGame: async () => {
       resetGame();
       toast.info("New game started!");
-      return "The game has been reset. Tell the user a new game is starting and that you are thinking of a new word. Encourage them to make their first guess.";
+      const newWordData = await fetchNewWord();
+      return `The game has been reset. I am thinking of a new word. The category is "${newWordData.category}". It has ${newWordData.word.length} letters. Encourage the user to make their first guess.`;
     }
-  }), [guessedWords, gameStatus, score, wordToGuess]);
+  }), [guessedWords, gameStatus, score, wordToGuess, currentWord]);
 
   const { startSession, endSession, status } = useConversation({
     onMessage: (message) => {
@@ -86,6 +116,7 @@ export const ConversationalAgent = () => {
     setIsConnecting(true);
     resetGame();
     try {
+      await fetchNewWord();
       // 1. Prompt for microphone access
       await navigator.mediaDevices.getUserMedia({ audio: true });
       console.log('Microphone access granted.');
@@ -153,8 +184,9 @@ export const ConversationalAgent = () => {
 
             <div className="text-center">
               <p className="text-lg">I'm thinking of a word...</p>
+              {currentWord?.category && <p className="text-sm text-muted-foreground">Hint: The category is "{currentWord.category}"</p>}
               <p className="text-4xl font-bold tracking-widest p-4">
-                {gameStatus === 'won' ? wordToGuess : wordToGuess.split('').map(() => '_').join('')}
+                {wordToGuess ? (gameStatus === 'won' ? wordToGuess : wordToGuess.split('').map(() => '_').join('')) : '...'}
               </p>
               {gameStatus === 'won' && <p className="text-green-500 font-bold text-lg">You won! The word was "{wordToGuess}"!</p>}
             </div>

@@ -165,7 +165,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_random_word: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          word: string
+          difficulty: Database["public"]["Enums"]["difficulty_level"]
+          category: string
+          emoji: string
+        }[]
+      }
     }
     Enums: {
       difficulty_level: "easy" | "medium" | "hard"
