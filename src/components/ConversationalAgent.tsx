@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -94,14 +93,14 @@ export const ConversationalAgent = () => {
         setScore(finalScore);
         setGameStatus('won');
         toast.success(`You guessed it! The word was "${currentState.wordToGuess}"! You scored ${finalScore} points.`);
-        return `The user correctly guessed the word ${normalizedWord}. Congratulate them enthusiastically, tell them they scored ${finalScore} points, and instruct them to say "new game" to play again.`;
+        return `The user's guess "${normalizedWord}" was CORRECT. They won. Congratulate them enthusiastically, tell them they scored ${finalScore} points, and instruct them to say "new game" to play again.`;
       } else {
         toast.error(`"${normalizedWord}" is not the word. Try again!`);
-        return `The user guessed ${normalizedWord}, which is incorrect. Encourage them to try again.`;
+        return `The user's guess "${normalizedWord}" was INCORRECT. Encourage them to try again and give them a clever hint for the secret word.`;
       }
     },
     getGameStatus: () => {
-      const { wordToGuess, gameStatus, score, guessedWords: currentGuessedWords, currentWord } = gameStateRef.current;
+      const { wordToGuess, gameStatus, score, guessedWords, currentWord } = gameStateRef.current;
 
       if (!wordToGuess) {
         return "The game is loading. I'm picking a word.";
@@ -110,17 +109,25 @@ export const ConversationalAgent = () => {
         return `The game is already won. The word was "${wordToGuess}". The final score was ${score}. The user can start a new game by asking to reset.`;
       }
 
-      if (currentGuessedWords.length === 0) {
-        return `The game has just started. The user has not made any guesses yet. The word to guess has ${wordToGuess.length} letters. The category is "${currentWord?.category}". Encourage the user to make their first guess.`;
-      }
+      const incorrectGuesses = guessedWords.filter(w => w !== wordToGuess).join(', ');
       
-      return `The user has made ${currentGuessedWords.length} guesses. The incorrect guesses are: ${currentGuessedWords.filter(w => w !== wordToGuess).join(', ')}. The word has ${wordToGuess.length} letters. The category is "${currentWord?.category}". Encourage them to guess again.`;
+      let statusReport = `The secret word is "${wordToGuess}". The category is "${currentWord?.category}". The word has ${wordToGuess.length} letters. `;
+
+      if (guessedWords.length === 0) {
+        statusReport += `The user has not made any guesses yet. Encourage them to make their first guess.`;
+      } else {
+        statusReport += `The user has made ${guessedWords.length} guesses. The incorrect guesses so far are: ${incorrectGuesses || 'none'}. Encourage them to guess again, and maybe give them a hint.`;
+      }
+      return statusReport;
     },
     resetGame: async () => {
       resetGame();
       toast.info("New game started!");
       const newWordData = await fetchNewWord();
-      return `The game has been reset. I am thinking of a new word. The category is "${newWordData.category}". It has ${newWordData.word.length} letters. Encourage the user to make their first guess.`;
+      if (!newWordData) {
+        return "Sorry, I couldn't think of a new word right now. Please try again in a moment.";
+      }
+      return `The secret word for you to know is "${newWordData.word}". Now, tell the user the game has been reset. The new word is from the category "${newWordData.category}" and has ${newWordData.word.length} letters. Encourage them to make their first guess.`;
     }
   }), []); // Using an empty dependency array to make the tools object stable
 
