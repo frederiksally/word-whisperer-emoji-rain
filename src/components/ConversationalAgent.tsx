@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,11 +27,19 @@ export const ConversationalAgent = () => {
     },
   });
 
-  const { guessedWords, wordToGuess, gameStatus, roundNumber, showLeaderboardDisplay, matchId } = states;
+  const { guessedWords, wordToGuess, gameStatus, roundNumber, showLeaderboardDisplay, matchId, currentWord } = states;
   const prevGuessedWords = usePrevious(guessedWords) ?? [];
   const prevGameStatus = usePrevious(gameStatus);
   const prevShowLeaderboardDisplay = usePrevious(showLeaderboardDisplay);
   const prevMatchId = usePrevious(matchId);
+  const prevCurrentWord = usePrevious(currentWord);
+
+  // Toast on new category
+  useEffect(() => {
+    if (currentWord && currentWord.id !== prevCurrentWord?.id) {
+      showToast(`Round ${roundNumber}: ${currentWord.category} (${wordToGuess.length} letters)`, { type: 'info', duration: 4000 });
+    }
+  }, [currentWord, prevCurrentWord, roundNumber, wordToGuess.length, showToast]);
 
   // Sound on new guess
   useEffect(() => {
@@ -40,10 +47,10 @@ export const ConversationalAgent = () => {
       const lastGuess = guessedWords[guessedWords.length - 1];
       if (lastGuess === wordToGuess) {
         playSound('guessCorrect');
-        showToast(`That's right!`, { type: 'success', duration: 2000 });
+        showToast(`You guessed it!`, { type: 'success', duration: 2000 });
       } else {
         playSound('guessIncorrect');
-        showToast(`"${lastGuess}" is not the word.`, { type: 'error', duration: 2000 });
+        // User requested to remove feedback for incorrect guess
       }
     }
   }, [guessedWords, prevGuessedWords, wordToGuess, playSound, matchId, showToast]);

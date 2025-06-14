@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 // Define the type for our word object
 type Word = {
@@ -109,13 +108,12 @@ export const useGameLogic = () => {
       .limit(20);
 
     if (error) {
-      toast.error("Could not fetch leaderboard scores.");
+      console.error("Could not fetch leaderboard scores.", error);
       setShowLeaderboardDisplay(true);
       return;
     }
 
     const lowestTopScore = data.length > 0 ? data[data.length - 1].total_score : 0;
-
     if (data.length < 20 || finalScore > lowestTopScore) {
       setShowLeaderboardPrompt(true);
     } else {
