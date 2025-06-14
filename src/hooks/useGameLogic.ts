@@ -134,7 +134,13 @@ export const useGameLogic = () => {
       finalMessage,
       wordToGuess,
     },
-    setters: {
+    actions: {
+      resetMatchState,
+      resetRoundState,
+      fetchNewWord,
+      startNewRoundLogic,
+      endGameAndCheckLeaderboard,
+      startNewMatch,
       setCurrentWord,
       setGuessedWords,
       setGameStatus,
@@ -146,14 +152,6 @@ export const useGameLogic = () => {
       setShowLeaderboardPrompt,
       setShowLeaderboardDisplay,
       setFinalMessage,
-    },
-    actions: {
-      resetMatchState,
-      resetRoundState,
-      fetchNewWord,
-      startNewRoundLogic,
-      endGameAndCheckLeaderboard,
-      startNewMatch,
     },
   };
 };
