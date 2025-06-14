@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,8 +26,7 @@ export const ConversationalAgent = () => {
 
       console.log('Received signed URL. Starting session...');
       // 3. Start the conversation session
-      // FIX: Pass the required `agentId` along with the `authorization` token.
-      await startSession({ agentId, authorization: data.url });
+      await startSession({ url: data.url });
       console.log('Session started.');
     } catch (error) {
       console.error('Failed to start conversation:', error);
@@ -61,4 +59,3 @@ export const ConversationalAgent = () => {
     </div>
   );
 };
-

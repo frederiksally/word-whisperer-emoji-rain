@@ -30,9 +30,9 @@ serve(async (req) => {
     requestHeaders.set("xi-api-key", ELEVENLABS_API_KEY);
 
     const response = await fetch(
-        `https://api.elevenlabs.io/v1/realtime/signed-url/${ELEVENLABS_AGENT_ID}`,
+        `https://api.elevenlabs.io/v1/convai/conversation/get_signed_url?agent_id=${ELEVENLABS_AGENT_ID}`,
         {
-          method: "POST",
+          method: "GET",
           headers: requestHeaders,
         }
     );
