@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,11 +13,13 @@ export const ConversationalAgent = () => {
   const [guessedWords, setGuessedWords] = useState<string[]>([]);
   const [gameStatus, setGameStatus] = useState<'playing' | 'won'>('playing');
   const [lastUserTranscript, setLastUserTranscript] = useState('');
+  const [score, setScore] = useState(0);
 
   const resetGame = () => {
     setGuessedWords([]);
     setGameStatus('playing');
     setLastUserTranscript('');
+    setScore(0);
   };
 
   // Important: For this to work, you must configure a "Client Tool" in your
@@ -40,12 +43,15 @@ export const ConversationalAgent = () => {
           return `The user already guessed the word ${normalizedWord}. Tell them to guess another word.`;
         }
 
-        setGuessedWords(prev => [...prev, normalizedWord]);
+        const newGuessedWords = [...guessedWords, normalizedWord];
+        setGuessedWords(newGuessedWords);
 
         if (normalizedWord === wordToGuess) {
+          const finalScore = Math.max(0, 100 - (newGuessedWords.length - 1) * 10);
+          setScore(finalScore);
           setGameStatus('won');
-          toast.success('You guessed it! The word was "lovable"!');
-          return `The user correctly guessed the word ${normalizedWord}. Congratulate them enthusiastically.`;
+          toast.success(`You guessed it! The word was "lovable"! You scored ${finalScore} points.`);
+          return `The user correctly guessed the word ${normalizedWord}. Congratulate them enthusiastically and tell them they scored ${finalScore} points.`;
         } else {
           toast.error(`"${normalizedWord}" is not the word. Try again!`);
           return `The user guessed ${normalizedWord}, which is incorrect. Encourage them to try again.`;
@@ -112,6 +118,17 @@ export const ConversationalAgent = () => {
             </Button>
         ) : (
           <div className="w-full flex flex-col items-center gap-4">
+            <div className="w-full flex justify-around text-center p-4 rounded-lg bg-muted border">
+              <div>
+                <p className="text-sm font-semibold text-muted-foreground tracking-wider">SCORE</p>
+                <p className="text-3xl font-bold">{score}</p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-muted-foreground tracking-wider">GUESSES</p>
+                <p className="text-3xl font-bold">{guessedWords.length}</p>
+              </div>
+            </div>
+
             <div className="text-center">
               <p className="text-lg">I'm thinking of a word...</p>
               <p className="text-4xl font-bold tracking-widest p-4">
