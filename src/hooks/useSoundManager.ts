@@ -1,7 +1,9 @@
-
 import { useRef, useCallback, useEffect } from 'react';
-import { Howl } from 'howler';
+import { Howl, Howler } from 'howler';
 import { soundConfig, SoundKey } from '@/config/sounds';
+
+// Ensure the master volume is enabled.
+Howler.volume(1.0);
 
 type SoundMap = {
   [key in SoundKey]?: Howl;
@@ -51,7 +53,6 @@ export const useSoundManager = () => {
     if (!soundInstances.current[key]) {
       soundInstances.current[key] = new Howl({
         src: [soundConfig[key]],
-        html5: true,
         loop: true,
         volume: 0.5,
       });
