@@ -46,6 +46,7 @@ export const ConversationalAgent = () => {
     }
     const newWord = data[0];
     const wordData = { word: newWord.word, category: newWord.category };
+    toast.info(`The new word is from the category: "${wordData.category}"`);
     setCurrentWord(wordData);
     return wordData;
   };
@@ -57,8 +58,15 @@ export const ConversationalAgent = () => {
   // - "resetGame" with no parameters.
   const clientTools = useMemo(() => ({
     submitGuess: ({ word }: { word: string }) => {
-      console.log(`submitGuess called with word: "${word}"`); // For debugging
-      const { wordToGuess, gameStatus, guessedWords: currentGuessedWords } = gameStateRef.current;
+      console.log('--- SUBMIT GUESS TOOL CALLED ---');
+      console.log('Word received from agent:', word);
+      const currentState = gameStateRef.current;
+      console.log('State inside tool:', { 
+        wordToGuess: currentState.wordToGuess,
+        gameStatus: currentState.gameStatus,
+        guessedWords: currentState.guessedWords.join(', '),
+        score: currentState.score,
+      });
 
       if (gameStatus === 'won') {
         return `The game is already over, the user won. The word was "${wordToGuess}". Instruct the user to say "new game" to play again.`;
