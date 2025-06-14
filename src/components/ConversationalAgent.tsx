@@ -23,7 +23,7 @@ export const ConversationalAgent = () => {
       console.log('Received signed URL. Starting session...');
       // 3. Start the conversation session with agentId and signedUrl
       await startSession({ 
-        agentId: 'your_agent_id_here', // This should match the agent ID used in the edge function
+        agentId: 'agent_01jxq0rwajewgtkkwf36qefp7w',
         signedUrl: data.url 
       });
       console.log('Session started.');
