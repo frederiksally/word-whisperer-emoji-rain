@@ -1,12 +1,20 @@
-
 import { useMemo, useRef } from 'react';
-import { useConversation, ConversationOptions } from '@11labs/react';
+import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MAX_ROUNDS, MAX_GUESSES_PER_ROUND } from './useGameLogic';
 
+// Since the options type is not exported from @11labs/react, we define it here based on usage.
+type AIAgentConversationOptions = {
+  onMessage?: (message: { source: string; message?: string; [key: string]: any }) => void;
+  onConnect?: () => void;
+  onDisconnect?: () => void;
+  onError?: (error: Error) => void;
+  overrides?: any;
+};
+
 // This hook requires the return value of useGameLogic as an argument
-export const useAIAgent = (gameLogic: any, options?: Omit<ConversationOptions, 'clientTools'>) => {
+export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions) => {
   const { states, setters, actions } = gameLogic;
   const {
     currentWord, guessedWords, gameStatus, score, totalScore, roundNumber,
