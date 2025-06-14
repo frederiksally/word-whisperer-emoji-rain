@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -127,7 +126,7 @@ export const ConversationalAgent = () => {
       const { wordToGuess, gameStatus, guessedWords, currentSessionId, roundNumber, totalScore } = currentState;
 
       if (gameStatus === 'won' || gameStatus === 'lost') {
-        return `The round is already over. The word was "${wordToGuess}". Instruct the user to say "next word" to continue or "new game" to start over.`;
+        return `The round is already over. The word was "${wordToGuess}". Ask the user if they are ready for the next round. If they give an affirmative answer, call the startNextRound tool.`;
       }
       if (!wordToGuess || !currentSessionId) {
         return "I'm still thinking of a word. Please give me a moment.";
@@ -162,7 +161,7 @@ export const ConversationalAgent = () => {
         await supabase.from('game_sessions').update({ ...updatePayload, score: roundScore, correct_guess: wordToGuess }).eq('id', currentSessionId);
 
         if (roundNumber < MAX_ROUNDS) {
-            return `The user's guess "${normalizedWord}" was CORRECT. They won the round and scored ${roundScore} points. Their total score is now ${newTotalScore}. Instruct them to say "next word" to start the next round.`;
+            return `The user's guess "${normalizedWord}" was CORRECT. They won the round and scored ${roundScore} points. Their total score is now ${newTotalScore}. Now, ask them if they are ready for the next round. If they give an affirmative answer, you MUST call the startNextRound tool.`;
         } else {
             return `The user's guess "${normalizedWord}" was CORRECT. They won the final round, scoring ${roundScore} points. This was the last round! Tell them the game is over and their final total score is ${newTotalScore}. They can say "new game" to play again.`;
         }
@@ -172,7 +171,7 @@ export const ConversationalAgent = () => {
             toast.error(`Too many guesses! The word was "${wordToGuess}".`);
             await supabase.from('game_sessions').update(updatePayload).eq('id', currentSessionId);
             if (roundNumber < MAX_ROUNDS) {
-                return `The user ran out of guesses. The round is over. The word was "${wordToGuess}". Tell them not to worry and to say "next word" to try the next round.`;
+                return `The user ran out of guesses. The round is over. The word was "${wordToGuess}". Tell them not to worry, and ask if they are ready for the next round. If they give an affirmative answer, you MUST call the startNextRound tool.`;
             } else {
                 return `The user ran out of guesses on the final round. The game is over. The word was "${wordToGuess}". Tell them their final score is ${totalScore} and they can say "new game" to play again.`;
             }
