@@ -1,15 +1,63 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
-  const { startSession, status } = useConversation();
+  const [wordToGuess] = useState('lovable');
+  const [guessedWords, setGuessedWords] = useState<string[]>([]);
+  const [gameStatus, setGameStatus] = useState<'playing' | 'won'>('playing');
+  const [lastUserTranscript, setLastUserTranscript] = useState('');
+
+  const resetGame = () => {
+    setGuessedWords([]);
+    setGameStatus('playing');
+    setLastUserTranscript('');
+  };
+
+  // Important: For this to work, you must configure a "Client Tool" in your
+  // ElevenLabs agent settings named "submitGuess" with one parameter: "word".
+  const { startSession, endSession, status, liveTranscript } = useConversation({
+    onMessage: (message) => {
+      if (message.type === 'user' && message.payload.final) {
+        setLastUserTranscript(message.payload.text);
+      }
+    },
+    clientTools: {
+      submitGuess: ({ word }: { word: string }) => {
+        const normalizedWord = word.toLowerCase().trim();
+        
+        if (!normalizedWord) {
+            return "The user didn't say a clear word. Ask them to guess again.";
+        }
+
+        if (guessedWords.includes(normalizedWord)) {
+          toast.info(`You already guessed "${normalizedWord}"`);
+          return `The user already guessed the word ${normalizedWord}. Tell them to guess another word.`;
+        }
+
+        setGuessedWords(prev => [...prev, normalizedWord]);
+
+        if (normalizedWord === wordToGuess) {
+          setGameStatus('won');
+          toast.success('You guessed it! The word was "lovable"!');
+          return `The user correctly guessed the word ${normalizedWord}. Congratulate them enthusiastically.`;
+        } else {
+          toast.error(`"${normalizedWord}" is not the word. Try again!`);
+          return `The user guessed ${normalizedWord}, which is incorrect. Encourage them to try again.`;
+        }
+      },
+    },
+  });
 
   const handleStartConversation = async () => {
     setIsConnecting(true);
+    resetGame();
     try {
       // 1. Prompt for microphone access
       await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -29,31 +77,74 @@ export const ConversationalAgent = () => {
       console.log('Session started.');
     } catch (error) {
       console.error('Failed to start conversation:', error);
-      alert(`Error starting conversation: ${error instanceof Error ? error.message : String(error)}`);
+      toast.error(`Error starting conversation: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsConnecting(false);
     }
   };
   
+  const handleStopConversation = () => {
+    if (endSession) endSession();
+    resetGame();
+  };
+
   const isConnected = status === 'connected';
 
+  useEffect(() => {
+    if (status !== 'connected') {
+      resetGame();
+    }
+  }, [status]);
+
   return (
-    <div className="flex flex-col items-center justify-center gap-4 p-4 rounded-lg bg-card text-card-foreground shadow-md max-w-md mx-auto">
-        <h2 className="text-2xl font-bold">Conversational AI</h2>
-        <p className="text-muted-foreground text-center">
-            Click the button to start a conversation with our voice agent.
-        </p>
+    <Card className="w-full max-w-lg mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-center">Word Guessing Game</CardTitle>
+        <CardDescription className="text-center text-muted-foreground">
+          Talk to our AI agent to guess the secret word!
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col items-center justify-center gap-6 p-6">
         <div className="text-sm font-mono p-2 bg-muted rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
         
         {!isConnected ? (
             <Button onClick={handleStartConversation} disabled={isConnecting}>
-                {isConnecting ? 'Starting...' : 'Start Conversation'}
+                {isConnecting ? 'Starting...' : 'Start Game'}
             </Button>
         ) : (
-            <div className="flex items-center gap-4">
-                <p className="text-green-500 font-semibold">Connected!</p>
+          <div className="w-full flex flex-col items-center gap-4">
+            <div className="text-center">
+              <p className="text-lg">I'm thinking of a word...</p>
+              <p className="text-4xl font-bold tracking-widest p-4">
+                {gameStatus === 'won' ? wordToGuess : wordToGuess.split('').map(() => '_').join(' ')}
+              </p>
+              {gameStatus === 'won' && <p className="text-green-500 font-bold text-lg">You won! The word was "{wordToGuess}"!</p>}
             </div>
+
+            <div className="w-full p-4 border rounded-lg bg-background">
+                <h3 className="font-semibold mb-2">Your Guesses:</h3>
+                <div className="flex flex-wrap gap-2 min-h-[28px]">
+                    {guessedWords.length > 0 ? (
+                        guessedWords.map((word, i) => <Badge key={i} variant={word === wordToGuess ? "default" : "destructive"}>{word}</Badge>)
+                    ) : (
+                        <p className="text-sm text-muted-foreground">No guesses yet. Say a word!</p>
+                    )}
+                </div>
+            </div>
+
+            <div className="w-full p-4 border rounded-lg bg-background">
+                <h3 className="font-semibold mb-2">What I'm hearing:</h3>
+                <p className="text-sm text-muted-foreground italic min-h-[20px]">
+                    {liveTranscript?.text || lastUserTranscript || '...'}
+                </p>
+            </div>
+            
+            <Button onClick={handleStopConversation} variant="destructive">
+                End Game
+            </Button>
+          </div>
         )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
