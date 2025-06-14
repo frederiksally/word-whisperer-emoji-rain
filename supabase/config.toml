@@ -1,1 +1,5 @@
+
 project_id = "ndggidkhgekvqjwfghex"
+
+[functions.elevenlabs-get-signed-url]
+verify_jwt = false
