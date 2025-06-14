@@ -52,6 +52,7 @@ export type Database = {
           end_time: string | null
           hints_used: number | null
           id: string
+          match_id: string | null
           player_name: string | null
           score: number | null
           start_time: string | null
@@ -66,6 +67,7 @@ export type Database = {
           end_time?: string | null
           hints_used?: number | null
           id?: string
+          match_id?: string | null
           player_name?: string | null
           score?: number | null
           start_time?: string | null
@@ -80,6 +82,7 @@ export type Database = {
           end_time?: string | null
           hints_used?: number | null
           id?: string
+          match_id?: string | null
           player_name?: string | null
           score?: number | null
           start_time?: string | null
