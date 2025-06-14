@@ -118,7 +118,10 @@ export const ConversationalAgent = () => {
   const isConnected = status === 'connected';
 
   useEffect(() => {
-    if (status !== 'connected' && !isConnecting && states.matchId && !states.showLeaderboardPrompt && !states.showLeaderboardDisplay) {
+    // Only reset the match if the status is fully 'disconnected'
+    // This prevents premature resets on temporary connection flickers
+    if (status === 'disconnected' && !isConnecting && states.matchId && !states.showLeaderboardPrompt && !states.showLeaderboardDisplay) {
+      toast.error("You have been disconnected from the agent.");
       actions.resetMatchState();
       setLastUserTranscript('');
     }
