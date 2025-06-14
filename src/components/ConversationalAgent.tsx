@@ -3,11 +3,10 @@ import React, { useState } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff } from 'lucide-react';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
-  const { startSession, status, isMuted, toggleMute } = useConversation();
+  const { startSession, status } = useConversation();
 
   const handleStartConversation = async () => {
     setIsConnecting(true);
@@ -23,7 +22,8 @@ export const ConversationalAgent = () => {
 
       console.log('Received signed URL. Starting session...');
       // 3. Start the conversation session
-      await startSession({ url: data.url });
+      // FIX: Changed `url` to `authorization` to match the expected type for this library version.
+      await startSession({ authorization: data.url });
       console.log('Session started.');
     } catch (error) {
       console.error('Failed to start conversation:', error);
@@ -49,10 +49,7 @@ export const ConversationalAgent = () => {
             </Button>
         ) : (
             <div className="flex items-center gap-4">
-                 <Button onClick={toggleMute} variant="outline" size="icon">
-                    {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                    <span className="sr-only">{isMuted ? 'Unmute' : 'Mute'}</span>
-                </Button>
+                {/* FIX: Removed mute button since isMuted/toggleMute are not available on the hook. */}
                 <p className="text-green-500 font-semibold">Connected!</p>
             </div>
         )}
