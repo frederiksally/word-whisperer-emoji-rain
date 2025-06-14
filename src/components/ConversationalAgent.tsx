@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { X, Check } from 'lucide-react';
+import { LeaderboardPromptDialog } from './LeaderboardPromptDialog';
+import { LeaderboardDisplay } from './LeaderboardDisplay';
 
 // Define the type for our word object
 type Word = {
@@ -33,6 +35,11 @@ export const ConversationalAgent = () => {
   const [roundNumber, setRoundNumber] = useState(1);
   const [matchId, setMatchId] = useState<string | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
+  // Leaderboard state
+  const [showLeaderboardPrompt, setShowLeaderboardPrompt] = useState(false);
+  const [showLeaderboardDisplay, setShowLeaderboardDisplay] = useState(false);
+  const [finalMessage, setFinalMessage] = useState('');
 
   const wordToGuess = useMemo(() => currentWord?.word.toLowerCase() ?? '', [currentWord]);
 
@@ -70,6 +77,9 @@ export const ConversationalAgent = () => {
     setRoundNumber(1);
     setMatchId(null);
     setCurrentSessionId(null);
+    setShowLeaderboardPrompt(false);
+    setShowLeaderboardDisplay(false);
+    setFinalMessage('');
   };
   
   const resetRoundState = () => {
@@ -118,6 +128,28 @@ export const ConversationalAgent = () => {
       return null;
   };
   
+  const endGameAndCheckLeaderboard = async (finalScore: number) => {
+    const { data, error } = await supabase
+      .from('match_leaderboard')
+      .select('total_score')
+      .order('total_score', { ascending: false })
+      .limit(20);
+
+    if (error) {
+      toast.error("Could not fetch leaderboard scores.");
+      setShowLeaderboardDisplay(true); // Fallback to just showing the board
+      return;
+    }
+
+    const lowestTopScore = data.length > 0 ? data[data.length - 1].total_score : 0;
+
+    if (data.length < 20 || finalScore > lowestTopScore) {
+      setShowLeaderboardPrompt(true);
+    } else {
+      setFinalMessage("You didn't make the top 20 this time. Better luck next time!");
+      setShowLeaderboardDisplay(true);
+    }
+  };
 
   const clientTools = useMemo(() => ({
     submitGuess: async ({ word }: { word: string }) => {
@@ -163,7 +195,8 @@ export const ConversationalAgent = () => {
         if (roundNumber < MAX_ROUNDS) {
             return `The user's guess "${normalizedWord}" was CORRECT. They won the round and scored ${roundScore} points. Their total score is now ${newTotalScore}. Now, ask them if they are ready for the next round. If they give an affirmative answer, you MUST call the startNextRound tool.`;
         } else {
-            return `The user's guess "${normalizedWord}" was CORRECT. They won the final round, scoring ${roundScore} points. This was the last round! Tell them the game is over and their final total score is ${newTotalScore}. They can say "new game" to play again.`;
+            endGameAndCheckLeaderboard(newTotalScore);
+            return `The user's guess "${normalizedWord}" was CORRECT. They won the final round, scoring ${roundScore} points. This was the last round! Tell them the game is over and their final total score is ${newTotalScore}. The application will now show them the leaderboard results.`;
         }
       } else { // Incorrect guess
         if (newGuessedWords.length >= MAX_GUESSES_PER_ROUND) {
@@ -173,7 +206,8 @@ export const ConversationalAgent = () => {
             if (roundNumber < MAX_ROUNDS) {
                 return `The user ran out of guesses. The round is over. The word was "${wordToGuess}". Tell them not to worry, and ask if they are ready for the next round. If they give an affirmative answer, you MUST call the startNextRound tool.`;
             } else {
-                return `The user ran out of guesses on the final round. The game is over. The word was "${wordToGuess}". Tell them their final score is ${totalScore} and they can say "new game" to play again.`;
+                endGameAndCheckLeaderboard(totalScore);
+                return `The user ran out of guesses on the final round. The game is over. The word was "${wordToGuess}". Tell them their final score is ${totalScore}, and the application will now show them the leaderboard results.`;
             }
         } else {
             toast.error(`"${normalizedWord}" is not the word. Try again!`);
@@ -189,7 +223,7 @@ export const ConversationalAgent = () => {
         return "The game hasn't started yet. The user needs to say 'start game'.";
       }
       if (gameStatus === 'won' || gameStatus === 'lost') {
-        return `The round is over. The word was "${wordToGuess}". The user's total score is ${totalScore}. The user can start the next round by saying "next word".`;
+        return `The round is over. The word was "${wordToGuess}". The user's total score is ${totalScore}. The user can start the next round by saying "next word" or see the leaderboard if the game is over.`;
       }
       if (!wordToGuess) {
         return "The game is loading. I'm picking a word.";
@@ -210,7 +244,8 @@ export const ConversationalAgent = () => {
     resetGame: async () => {
       const newMatchId = crypto.randomUUID();
       setMatchId(newMatchId);
-      setTotalScore(0);
+      resetMatchState(); // Use the full reset
+      setMatchId(newMatchId); // re-set matchId after reset
       
       const newWordData = await startNewRoundLogic(newMatchId, 1);
       if (!newWordData) {
@@ -226,7 +261,8 @@ export const ConversationalAgent = () => {
         return "The game hasn't started yet. The user needs to say 'start game' first.";
       }
       if (roundNumber >= MAX_ROUNDS) {
-          return `The game is already over. You have completed all ${MAX_ROUNDS} rounds. Tell the user their final score is ${totalScore} and they can say "new game" to play again.`;
+          endGameAndCheckLeaderboard(totalScore);
+          return `The game is already over. You have completed all ${MAX_ROUNDS} rounds. Tell the user their final score is ${totalScore} and the application will now show them the leaderboard results.`;
       }
 
       const nextRound = roundNumber + 1;
@@ -237,7 +273,7 @@ export const ConversationalAgent = () => {
 
       return `The secret word for round ${nextRound} is "${newWordData.word}". Now, tell the user that round ${nextRound} is starting. The category is "${newWordData.category}" and the word has ${newWordData.word.length} letters.`;
     }
-  }), []);
+  }), [endGameAndCheckLeaderboard]);
 
   const { startSession, endSession, status } = useConversation({
     onMessage: (message) => {
@@ -275,6 +311,14 @@ export const ConversationalAgent = () => {
     resetMatchState();
   };
 
+  const handlePlayAgain = () => {
+    if (isConnected) {
+        clientTools.resetGame();
+    } else {
+        handleStartConversation();
+    }
+  }
+
   const isConnected = status === 'connected';
 
   useEffect(() => {
@@ -287,8 +331,20 @@ export const ConversationalAgent = () => {
     ? `${guessedWords.length} / ${MAX_GUESSES_PER_ROUND}` 
     : `${guessedWords.length}`;
 
+  if (showLeaderboardDisplay) {
+    return <LeaderboardDisplay onPlayAgain={handlePlayAgain} />;
+  }
+  
   return (
     <Card className="w-full max-w-lg mx-auto">
+      <LeaderboardPromptDialog
+        isOpen={showLeaderboardPrompt}
+        totalScore={totalScore}
+        onClose={() => {
+          setShowLeaderboardPrompt(false);
+          setShowLeaderboardDisplay(true);
+        }}
+      />
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">Word Guessing Game</CardTitle>
         <CardDescription className="text-center text-muted-foreground">
@@ -333,6 +389,7 @@ export const ConversationalAgent = () => {
                 </p>
                 {gameStatus === 'won' && <p className="text-green-500 font-bold text-lg">You won this round! The word was "{wordToGuess}"!</p>}
                 {gameStatus === 'lost' && <p className="text-red-500 font-bold text-lg">Round over! The word was "{wordToGuess}"!</p>}
+                {finalMessage && <p className="text-blue-500 font-bold text-lg">{finalMessage}</p>}
               </div>
 
               <div className="w-full p-4 border rounded-lg bg-background">

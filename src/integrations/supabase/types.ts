@@ -136,6 +136,30 @@ export type Database = {
         }
         Relationships: []
       }
+      match_leaderboard: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          player_name: string
+          total_score: number
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          player_name: string
+          total_score: number
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          player_name?: string
+          total_score?: number
+        }
+        Relationships: []
+      }
       words: {
         Row: {
           category: string | null
