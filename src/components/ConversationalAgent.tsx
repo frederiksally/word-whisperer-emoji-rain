@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { X, Check } from 'lucide-react';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
@@ -151,16 +151,24 @@ export const ConversationalAgent = () => {
             <div className="text-center">
               <p className="text-lg">I'm thinking of a word...</p>
               <p className="text-4xl font-bold tracking-widest p-4">
-                {gameStatus === 'won' ? wordToGuess : wordToGuess.split('').map(() => '_').join(' ')}
+                {gameStatus === 'won' ? wordToGuess : wordToGuess.split('').map(() => '_').join('')}
               </p>
               {gameStatus === 'won' && <p className="text-green-500 font-bold text-lg">You won! The word was "{wordToGuess}"!</p>}
             </div>
 
             <div className="w-full p-4 border rounded-lg bg-background">
                 <h3 className="font-semibold mb-2">Your Guesses:</h3>
-                <div className="flex flex-wrap gap-2 min-h-[28px]">
+                <div className="flex flex-wrap items-center gap-2 min-h-[28px]">
                     {guessedWords.length > 0 ? (
-                        guessedWords.map((word, i) => <Badge key={i} variant={word === wordToGuess ? "default" : "destructive"}>{word}</Badge>)
+                        guessedWords.map((word, i) => {
+                          const isCorrect = word === wordToGuess;
+                          return (
+                            <Badge key={i} variant={isCorrect ? "success" : "destructive"} className="flex items-center gap-1.5">
+                              {isCorrect ? <Check size={14} /> : <X size={14} />}
+                              <span>{word}</span>
+                            </Badge>
+                          );
+                        })
                     ) : (
                         <p className="text-sm text-muted-foreground">No guesses yet. Say a word!</p>
                     )}
