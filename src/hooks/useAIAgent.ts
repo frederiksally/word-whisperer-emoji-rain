@@ -1,12 +1,11 @@
-
 import { useMemo, useRef } from 'react';
-import { useConversation } from '@11labs/react';
+import { useConversation, UseConversationOptions } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MAX_ROUNDS, MAX_GUESSES_PER_ROUND } from './useGameLogic';
 
 // This hook requires the return value of useGameLogic as an argument
-export const useAIAgent = (gameLogic: any) => {
+export const useAIAgent = (gameLogic: any, options?: Omit<UseConversationOptions, 'clientTools'>) => {
   const { states, setters, actions } = gameLogic;
   const {
     currentWord, guessedWords, gameStatus, score, totalScore, roundNumber,
@@ -106,11 +105,7 @@ export const useAIAgent = (gameLogic: any) => {
       return statusReport;
     },
     resetGame: async () => {
-      const newMatchId = crypto.randomUUID();
-      actions.resetMatchState();
-      setters.setMatchId(newMatchId);
-      
-      const newWordData = await actions.startNewRoundLogic(newMatchId, 1);
+      const newWordData = await actions.startNewMatch();
       if (!newWordData) {
         return "Sorry, I couldn't think of a new word right now. Please try again in a moment.";
       }
@@ -139,6 +134,7 @@ export const useAIAgent = (gameLogic: any) => {
   }), [gameLogic]);
 
   const { startSession, endSession, status } = useConversation({
+    ...options,
     clientTools,
   });
 
@@ -149,4 +145,3 @@ export const useAIAgent = (gameLogic: any) => {
     clientTools,
   };
 };
-

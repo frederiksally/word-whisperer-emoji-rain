@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,21 +16,24 @@ export const ConversationalAgent = () => {
   
   const gameLogic = useGameLogic();
   const { states, actions, setters } = gameLogic;
-  const { startSession: startAIAgentSession, endSession, status, clientTools } = useAIAgent(gameLogic);
-
-  const { startSession, ...agent } = useConversation({
+  const { startSession, endSession, status, clientTools } = useAIAgent(gameLogic, {
     onMessage: (message) => {
       if (message.source === 'user' && message.message) {
         setLastUserTranscript(message.message);
       }
     },
-    clientTools: clientTools,
   });
-
 
   const handleStartConversation = async () => {
     setIsConnecting(true);
-    actions.resetMatchState();
+    
+    const newWordData = await actions.startNewMatch();
+    if (!newWordData) {
+      toast.error("Could not start game. Please try again.");
+      setIsConnecting(false);
+      return;
+    }
+
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       const { data, error } = await supabase.functions.invoke('elevenlabs-get-signed-url');
@@ -43,6 +45,7 @@ export const ConversationalAgent = () => {
     } catch (error) {
       console.error('Failed to start conversation:', error);
       toast.error(`Error starting conversation: ${error instanceof Error ? error.message : String(error)}`);
+      actions.resetMatchState();
     } finally {
       setIsConnecting(false);
     }
@@ -65,11 +68,11 @@ export const ConversationalAgent = () => {
   const isConnected = status === 'connected';
 
   useEffect(() => {
-    if (status !== 'connected' && !isConnecting) {
+    if (status !== 'connected' && !isConnecting && states.matchId) {
       actions.resetMatchState();
       setLastUserTranscript('');
     }
-  }, [status, isConnecting, actions.resetMatchState]);
+  }, [status, isConnecting, actions, states.matchId]);
 
   if (states.showLeaderboardDisplay) {
     return <LeaderboardDisplay onPlayAgain={handlePlayAgain} />;
@@ -94,15 +97,15 @@ export const ConversationalAgent = () => {
       <CardContent className="flex flex-col items-center justify-center gap-6 p-6">
         <div className="text-sm font-mono p-2 bg-muted rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
         
-        {!isConnected ? (
+        {!states.matchId ? (
             <Button onClick={handleStartConversation} disabled={isConnecting}>
                 {isConnecting ? 'Starting...' : 'Start Game'}
             </Button>
         ) : (
           <>
-            {!states.matchId ? (
+            {!isConnected ? (
                 <div className="text-center p-8">
-                    <p className="text-2xl font-bold">Say "Start Game" to begin!</p>
+                    <p className="text-2xl font-bold">Connecting to agent...</p>
                 </div>
             ) : (
               <GameUI 

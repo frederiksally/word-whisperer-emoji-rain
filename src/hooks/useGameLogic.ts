@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -88,6 +87,20 @@ export const useGameLogic = () => {
     return null;
   }, [fetchNewWord]);
   
+  const startNewMatch = useCallback(async () => {
+    const newMatchId = crypto.randomUUID();
+    resetMatchState();
+    setMatchId(newMatchId);
+    
+    const newWordData = await startNewRoundLogic(newMatchId, 1);
+    
+    if (!newWordData) {
+        setMatchId(null);
+        return null;
+    }
+    return newWordData;
+  }, [resetMatchState, startNewRoundLogic]);
+
   const endGameAndCheckLeaderboard = useCallback(async (finalScore: number) => {
     const { data, error } = await supabase
       .from('match_leaderboard')
@@ -145,7 +158,7 @@ export const useGameLogic = () => {
       fetchNewWord,
       startNewRoundLogic,
       endGameAndCheckLeaderboard,
+      startNewMatch,
     },
   };
 };
-
