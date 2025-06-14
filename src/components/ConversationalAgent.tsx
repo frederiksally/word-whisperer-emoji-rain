@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,15 +19,10 @@ export const ConversationalAgent = () => {
       const { data, error } = await supabase.functions.invoke('elevenlabs-get-signed-url');
       if (error) throw error;
       if (!data.url) throw new Error('No URL returned from edge function.');
-      
-      const agentId = import.meta.env.VITE_ELEVENLABS_AGENT_ID;
-      if (!agentId) {
-        throw new Error("VITE_ELEVENLABS_AGENT_ID is not set in the frontend environment variables.");
-      }
 
       console.log('Received signed URL. Starting session...');
-      // 3. Start the conversation session
-      await startSession({ url: data.url });
+      // 3. Start the conversation session using authorization parameter
+      await startSession({ authorization: data.url });
       console.log('Session started.');
     } catch (error) {
       console.error('Failed to start conversation:', error);
@@ -52,7 +48,6 @@ export const ConversationalAgent = () => {
             </Button>
         ) : (
             <div className="flex items-center gap-4">
-                {/* FIX: Removed mute button since isMuted/toggleMute are not available on the hook. */}
                 <p className="text-green-500 font-semibold">Connected!</p>
             </div>
         )}
