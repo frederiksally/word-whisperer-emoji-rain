@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import { LeaderboardPromptDialog } from './LeaderboardPromptDialog';
 import { LeaderboardDisplay } from './LeaderboardDisplay';
 import { useGameLogic, MAX_ROUNDS } from '@/hooks/useGameLogic';
@@ -11,11 +10,13 @@ import { useAIAgent } from '@/hooks/useAIAgent';
 import { GameUI } from './game/GameUI';
 import { useSound } from '@/contexts/SoundContext';
 import { usePrevious } from '@/hooks/usePrevious';
+import { useGameToast } from '@/contexts/GameToastContext';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [lastUserTranscript, setLastUserTranscript] = useState('');
   const { playSound, playMusic, stopMusic } = useSound();
+  const { showToast } = useGameToast();
   
   const gameLogic = useGameLogic();
   const { states, actions, setters } = gameLogic;
@@ -39,25 +40,31 @@ export const ConversationalAgent = () => {
       const lastGuess = guessedWords[guessedWords.length - 1];
       if (lastGuess === wordToGuess) {
         playSound('guessCorrect');
+        showToast(`That's right!`, { type: 'success', duration: 2000 });
       } else {
         playSound('guessIncorrect');
+        showToast(`"${lastGuess}" is not the word.`, { type: 'error', duration: 2000 });
       }
     }
-  }, [guessedWords, prevGuessedWords, wordToGuess, playSound, matchId]);
+  }, [guessedWords, prevGuessedWords, wordToGuess, playSound, matchId, showToast]);
 
-  // Sound on round end
+  // Sound and Toast on round end
   useEffect(() => {
     if (prevGameStatus === 'playing' && gameStatus !== 'playing') {
       if (gameStatus === 'won') {
         playSound('roundWin');
         if (roundNumber === MAX_ROUNDS) {
           playSound('gameWin');
+          showToast('Congratulations, you won the whole game!', { type: 'success', duration: 5000 });
+        } else {
+          showToast(`You won round ${roundNumber}!`, { type: 'success' });
         }
       } else if (gameStatus === 'lost') {
         playSound('roundLose');
+        showToast(`Round over! The word was "${wordToGuess}".`, { type: 'info' });
       }
     }
-  }, [gameStatus, prevGameStatus, roundNumber, playSound]);
+  }, [gameStatus, prevGameStatus, roundNumber, playSound, showToast, wordToGuess]);
 
   // Handle music changes
   useEffect(() => {
@@ -77,7 +84,7 @@ export const ConversationalAgent = () => {
     
     const newWordData = await actions.startNewMatch();
     if (!newWordData) {
-      toast.error("Could not start game. Please try again.");
+      showToast("Could not start game. Please try again.", { type: 'error' });
       setIsConnecting(false);
       return;
     }
@@ -92,7 +99,7 @@ export const ConversationalAgent = () => {
 
     } catch (error) {
       console.error('Failed to start conversation:', error);
-      toast.error(`Error starting conversation: ${error instanceof Error ? error.message : String(error)}`);
+      showToast(`Error starting conversation: ${error instanceof Error ? error.message : String(error)}`, { type: 'error' });
       actions.resetMatchState();
     } finally {
       setIsConnecting(false);
@@ -120,11 +127,11 @@ export const ConversationalAgent = () => {
     // Only reset the match if the status is fully 'disconnected'
     // This prevents premature resets on temporary connection flickers
     if (status === 'disconnected' && !isConnecting && states.matchId && !states.showLeaderboardPrompt && !states.showLeaderboardDisplay) {
-      toast.error("You have been disconnected from the agent.");
+      showToast("You have been disconnected from the agent.", { type: 'error' });
       actions.resetMatchState();
       setLastUserTranscript('');
     }
-  }, [status, isConnecting, actions, states.matchId, states.showLeaderboardPrompt, states.showLeaderboardDisplay]);
+  }, [status, isConnecting, actions, states.matchId, states.showLeaderboardPrompt, states.showLeaderboardDisplay, showToast]);
 
   if (states.showLeaderboardDisplay) {
     return <LeaderboardDisplay onPlayAgain={handlePlayAgain} />;
