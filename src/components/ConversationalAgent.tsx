@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,10 +21,10 @@ export const ConversationalAgent = () => {
 
   // Important: For this to work, you must configure a "Client Tool" in your
   // ElevenLabs agent settings named "submitGuess" with one parameter: "word".
-  const { startSession, endSession, status, liveTranscript } = useConversation({
+  const { startSession, endSession, status } = useConversation({
     onMessage: (message) => {
-      if (message.type === 'user' && message.payload.final) {
-        setLastUserTranscript(message.payload.text);
+      if (message.source === 'user' && message.message) {
+        setLastUserTranscript(message.message);
       }
     },
     clientTools: {
@@ -135,7 +134,7 @@ export const ConversationalAgent = () => {
             <div className="w-full p-4 border rounded-lg bg-background">
                 <h3 className="font-semibold mb-2">What I'm hearing:</h3>
                 <p className="text-sm text-muted-foreground italic min-h-[20px]">
-                    {liveTranscript?.text || lastUserTranscript || '...'}
+                    {lastUserTranscript || '...'}
                 </p>
             </div>
             
