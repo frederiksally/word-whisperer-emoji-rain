@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -68,11 +69,11 @@ export const ConversationalAgent = () => {
         score: currentState.score,
       });
 
-      if (gameStatus === 'won') {
-        return `The game is already over, the user won. The word was "${wordToGuess}". Instruct the user to say "new game" to play again.`;
+      if (currentState.gameStatus === 'won') {
+        return `The game is already over, the user won. The word was "${currentState.wordToGuess}". Instruct the user to say "new game" to play again.`;
       }
 
-      if (!wordToGuess) {
+      if (!currentState.wordToGuess) {
         return "I'm still thinking of a word. Please give me a moment.";
       }
       const normalizedWord = word.toLowerCase().trim();
@@ -81,18 +82,18 @@ export const ConversationalAgent = () => {
           return "The user didn't say a clear word. Ask them to guess again.";
       }
 
-      if (currentGuessedWords.includes(normalizedWord)) {
+      if (currentState.guessedWords.includes(normalizedWord)) {
         toast.info(`You already guessed "${normalizedWord}"`);
         return `The user already guessed the word ${normalizedWord}. Tell them to guess another word.`;
       }
 
       setGuessedWords(prevGuessedWords => [...prevGuessedWords, normalizedWord]);
 
-      if (normalizedWord === wordToGuess) {
-        const finalScore = Math.max(0, 100 - currentGuessedWords.length * 10);
+      if (normalizedWord === currentState.wordToGuess) {
+        const finalScore = Math.max(0, 100 - currentState.guessedWords.length * 10);
         setScore(finalScore);
         setGameStatus('won');
-        toast.success(`You guessed it! The word was "${wordToGuess}"! You scored ${finalScore} points.`);
+        toast.success(`You guessed it! The word was "${currentState.wordToGuess}"! You scored ${finalScore} points.`);
         return `The user correctly guessed the word ${normalizedWord}. Congratulate them enthusiastically, tell them they scored ${finalScore} points, and instruct them to say "new game" to play again.`;
       } else {
         toast.error(`"${normalizedWord}" is not the word. Try again!`);
