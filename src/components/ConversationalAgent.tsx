@@ -54,6 +54,11 @@ export const ConversationalAgent = () => {
   const clientTools = useMemo(() => ({
     submitGuess: ({ word }: { word: string }) => {
       console.log(`submitGuess called with word: "${word}"`); // For debugging
+
+      if (gameStatus === 'won') {
+        return `The game is already over, the user won. The word was "${wordToGuess}". Instruct the user to say "new game" to play again.`;
+      }
+
       if (!wordToGuess) {
         return "I'm still thinking of a word. Please give me a moment.";
       }
@@ -68,11 +73,10 @@ export const ConversationalAgent = () => {
         return `The user already guessed the word ${normalizedWord}. Tell them to guess another word.`;
       }
 
-      const newGuessedWords = [...guessedWords, normalizedWord];
-      setGuessedWords(newGuessedWords);
+      setGuessedWords(prevGuessedWords => [...prevGuessedWords, normalizedWord]);
 
       if (normalizedWord === wordToGuess) {
-        const finalScore = Math.max(0, 100 - (newGuessedWords.length - 1) * 10);
+        const finalScore = Math.max(0, 100 - guessedWords.length * 10);
         setScore(finalScore);
         setGameStatus('won');
         toast.success(`You guessed it! The word was "${wordToGuess}"! You scored ${finalScore} points.`);
