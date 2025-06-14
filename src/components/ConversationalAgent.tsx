@@ -160,10 +160,12 @@ export const ConversationalAgent = () => {
   const isConnected = status === 'connected';
 
   useEffect(() => {
-    if (status !== 'connected') {
+    // Only reset the game if we are not connected AND not in the process of connecting.
+    // This prevents clearing the state during the initial connection sequence.
+    if (status !== 'connected' && !isConnecting) {
       resetGame();
     }
-  }, [status]);
+  }, [status, isConnecting]);
 
   return (
     <Card className="w-full max-w-lg mx-auto">
