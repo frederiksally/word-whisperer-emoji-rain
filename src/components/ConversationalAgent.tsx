@@ -53,6 +53,7 @@ export const ConversationalAgent = () => {
   // - "resetGame" with no parameters.
   const clientTools = useMemo(() => ({
     submitGuess: ({ word }: { word: string }) => {
+      console.log(`submitGuess called with word: "${word}"`); // For debugging
       if (!wordToGuess) {
         return "I'm still thinking of a word. Please give me a moment.";
       }
@@ -75,7 +76,7 @@ export const ConversationalAgent = () => {
         setScore(finalScore);
         setGameStatus('won');
         toast.success(`You guessed it! The word was "${wordToGuess}"! You scored ${finalScore} points.`);
-        return `The user correctly guessed the word ${normalizedWord}. Congratulate them enthusiastically and tell them they scored ${finalScore} points. Also ask if they want to play again.`;
+        return `The user correctly guessed the word ${normalizedWord}. Congratulate them enthusiastically, tell them they scored ${finalScore} points, and instruct them to say "new game" to play again.`;
       } else {
         toast.error(`"${normalizedWord}" is not the word. Try again!`);
         return `The user guessed ${normalizedWord}, which is incorrect. Encourage them to try again.`;
