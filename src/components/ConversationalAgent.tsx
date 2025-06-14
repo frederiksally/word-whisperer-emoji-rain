@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -68,11 +69,11 @@ export const ConversationalAgent = () => {
   const isConnected = status === 'connected';
 
   useEffect(() => {
-    if (status !== 'connected' && !isConnecting && states.matchId) {
+    if (status !== 'connected' && !isConnecting && states.matchId && !states.showLeaderboardPrompt && !states.showLeaderboardDisplay) {
       actions.resetMatchState();
       setLastUserTranscript('');
     }
-  }, [status, isConnecting, actions, states.matchId]);
+  }, [status, isConnecting, actions, states.matchId, states.showLeaderboardPrompt, states.showLeaderboardDisplay]);
 
   if (states.showLeaderboardDisplay) {
     return <LeaderboardDisplay onPlayAgain={handlePlayAgain} />;

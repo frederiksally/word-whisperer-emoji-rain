@@ -1,11 +1,12 @@
+
 import { useMemo, useRef } from 'react';
-import { useConversation, UseConversationOptions } from '@11labs/react';
+import { useConversation, ConversationOptions } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MAX_ROUNDS, MAX_GUESSES_PER_ROUND } from './useGameLogic';
 
 // This hook requires the return value of useGameLogic as an argument
-export const useAIAgent = (gameLogic: any, options?: Omit<UseConversationOptions, 'clientTools'>) => {
+export const useAIAgent = (gameLogic: any, options?: Omit<ConversationOptions, 'clientTools'>) => {
   const { states, setters, actions } = gameLogic;
   const {
     currentWord, guessedWords, gameStatus, score, totalScore, roundNumber,
