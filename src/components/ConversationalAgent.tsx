@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -27,56 +28,58 @@ export const ConversationalAgent = () => {
   // - "submitGuess" with one parameter: "word".
   // - "getGameStatus" with no parameters.
   // - "resetGame" with no parameters.
+  const clientTools = useMemo(() => ({
+    submitGuess: ({ word }: { word: string }) => {
+      const normalizedWord = word.toLowerCase().trim();
+      
+      if (!normalizedWord) {
+          return "The user didn't say a clear word. Ask them to guess again.";
+      }
+
+      if (guessedWords.includes(normalizedWord)) {
+        toast.info(`You already guessed "${normalizedWord}"`);
+        return `The user already guessed the word ${normalizedWord}. Tell them to guess another word.`;
+      }
+
+      const newGuessedWords = [...guessedWords, normalizedWord];
+      setGuessedWords(newGuessedWords);
+
+      if (normalizedWord === wordToGuess) {
+        const finalScore = Math.max(0, 100 - (newGuessedWords.length - 1) * 10);
+        setScore(finalScore);
+        setGameStatus('won');
+        toast.success(`You guessed it! The word was "lovable"! You scored ${finalScore} points.`);
+        return `The user correctly guessed the word ${normalizedWord}. Congratulate them enthusiastically and tell them they scored ${finalScore} points.`;
+      } else {
+        toast.error(`"${normalizedWord}" is not the word. Try again!`);
+        return `The user guessed ${normalizedWord}, which is incorrect. Encourage them to try again.`;
+      }
+    },
+    getGameStatus: () => {
+      if (gameStatus === 'won') {
+        return `The game is already won. The word was "${wordToGuess}". The final score was ${score}. The user can start a new game by asking to reset.`;
+      }
+
+      if (guessedWords.length === 0) {
+        return `The game has just started. The user has not made any guesses yet. The word to guess has ${wordToGuess.length} letters. Encourage the user to make their first guess.`;
+      }
+      
+      return `The user has made ${guessedWords.length} guesses. The incorrect guesses are: ${guessedWords.filter(w => w !== wordToGuess).join(', ')}. The current score is ${score}. The word has ${wordToGuess.length} letters. Encourage them to guess again.`;
+    },
+    resetGame: () => {
+      resetGame();
+      toast.info("New game started!");
+      return "The game has been reset. Tell the user a new game is starting and that you are thinking of a new word. Encourage them to make their first guess.";
+    }
+  }), [guessedWords, gameStatus, score, wordToGuess]);
+
   const { startSession, endSession, status } = useConversation({
     onMessage: (message) => {
       if (message.source === 'user' && message.message) {
         setLastUserTranscript(message.message);
       }
     },
-    clientTools: {
-      submitGuess: ({ word }: { word: string }) => {
-        const normalizedWord = word.toLowerCase().trim();
-        
-        if (!normalizedWord) {
-            return "The user didn't say a clear word. Ask them to guess again.";
-        }
-
-        if (guessedWords.includes(normalizedWord)) {
-          toast.info(`You already guessed "${normalizedWord}"`);
-          return `The user already guessed the word ${normalizedWord}. Tell them to guess another word.`;
-        }
-
-        const newGuessedWords = [...guessedWords, normalizedWord];
-        setGuessedWords(newGuessedWords);
-
-        if (normalizedWord === wordToGuess) {
-          const finalScore = Math.max(0, 100 - (newGuessedWords.length - 1) * 10);
-          setScore(finalScore);
-          setGameStatus('won');
-          toast.success(`You guessed it! The word was "lovable"! You scored ${finalScore} points.`);
-          return `The user correctly guessed the word ${normalizedWord}. Congratulate them enthusiastically and tell them they scored ${finalScore} points.`;
-        } else {
-          toast.error(`"${normalizedWord}" is not the word. Try again!`);
-          return `The user guessed ${normalizedWord}, which is incorrect. Encourage them to try again.`;
-        }
-      },
-      getGameStatus: () => {
-        if (gameStatus === 'won') {
-          return `The game is already won. The word was "${wordToGuess}". The final score was ${score}. The user can start a new game by asking to reset.`;
-        }
-
-        if (guessedWords.length === 0) {
-          return `The game has just started. The user has not made any guesses yet. The word to guess has ${wordToGuess.length} letters. Encourage the user to make their first guess.`;
-        }
-        
-        return `The user has made ${guessedWords.length} guesses. The incorrect guesses are: ${guessedWords.filter(w => w !== wordToGuess).join(', ')}. The current score is ${score}. The word has ${wordToGuess.length} letters. Encourage them to guess again.`;
-      },
-      resetGame: () => {
-        resetGame();
-        toast.info("New game started!");
-        return "The game has been reset. Tell the user a new game is starting and that you are thinking of a new word. Encourage them to make their first guess.";
-      }
-    },
+    clientTools,
   });
 
   const handleStartConversation = async () => {
