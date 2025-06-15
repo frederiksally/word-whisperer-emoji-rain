@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -5,7 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 type Word = {
   id: string;
   word: string;
-  category: string | null;
+  theme: string | null;
+  clue: string | null;
 };
 
 // Game constants
@@ -54,12 +56,12 @@ export const useGameLogic = () => {
     const { data, error } = await supabase.rpc('get_random_word');
     if (error || !data || data.length === 0) {
       console.error('Failed to fetch new word, using fallback.', error);
-      const fallbackWord = { id: 'fallback-id', word: 'lovable', category: 'Adjective' };
+      const fallbackWord = { id: 'fallback-id', word: 'lovable', theme: 'Adjective', clue: 'Describes a noun, often with kindness.' };
       setCurrentWord(fallbackWord);
       return fallbackWord;
     }
     const newWord = data[0];
-    const wordData = { id: newWord.id, word: newWord.word, category: newWord.category };
+    const wordData = { id: newWord.id, word: newWord.word, theme: newWord.theme, clue: newWord.clue };
     setCurrentWord(wordData);
     return wordData;
   }, []);

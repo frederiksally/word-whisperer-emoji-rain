@@ -85,7 +85,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
         } else {
             toast.error(`"${normalizedWord}" is not the word. Try again!`);
             const guessesLeft = MAX_GUESSES_PER_ROUND - newGuessedWords.length;
-            return `The user's guess "${normalizedWord}" was INCORRECT. They have ${guessesLeft} guesses left for this round. Encourage them to try again and give them a clever hint.`;
+            return `The user's guess "${normalizedWord}" was INCORRECT. They have ${guessesLeft} guesses left for this round. Encourage them to try again. Use the secret clue to give them a clever hint.`;
         }
       }
     },
@@ -105,7 +105,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
       const incorrectGuesses = guessedWords.filter(w => w !== wordToGuess).join(', ');
       const guessesLeft = MAX_GUESSES_PER_ROUND - guessedWords.length;
       
-      let statusReport = `The secret word is "${wordToGuess}". We are in round ${roundNumber} of ${MAX_ROUNDS}. The total score is ${totalScore}. The category is "${currentWord?.category}". The word has ${wordToGuess.length} letters. The user has ${guessesLeft} guesses left. `;
+      let statusReport = `The secret word is "${wordToGuess}". The secret clue for you to use is "${currentWord?.clue}". We are in round ${roundNumber} of ${MAX_ROUNDS}. The total score is ${totalScore}. The theme is "${currentWord?.theme}". The word has ${wordToGuess.length} letters. The user has ${guessesLeft} guesses left. `;
 
       if (guessedWords.length === 0) {
         statusReport += `The user has not made any guesses yet.`;
@@ -121,7 +121,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
       }
       
       toast.info("New game started!");
-      return `The secret word for you to know is "${newWordData.word}". Now, tell the user a new game has started. This is round 1 of ${MAX_ROUNDS}. The new word is from the category "${newWordData.category}" and has ${newWordData.word.length} letters. Encourage them to make their first guess.`;
+      return `The secret word for you to know is "${newWordData.word}" and the secret clue is "${newWordData.clue}". Now, tell the user a new game has started. This is round 1 of ${MAX_ROUNDS}. The new word is from the theme "${newWordData.theme}" and has ${newWordData.word.length} letters. Encourage them to make their first guess.`;
     },
     startNextRound: async () => {
       const { roundNumber, matchId, totalScore } = gameStateRef.current;
@@ -139,7 +139,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
           return "Sorry, I couldn't get a new word. Please ask the user to try again in a moment.";
       }
 
-      return `The secret word for round ${nextRound} is "${newWordData.word}". Now, tell the user that round ${nextRound} is starting. The category is "${newWordData.category}" and the word has ${newWordData.word.length} letters.`;
+      return `The secret word for round ${nextRound} is "${newWordData.word}" and the secret clue is "${newWordData.clue}". Now, tell the user that round ${nextRound} is starting. The theme is "${newWordData.theme}" and the word has ${newWordData.word.length} letters.`;
     }
   }), [gameLogic]);
 

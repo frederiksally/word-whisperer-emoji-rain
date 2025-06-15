@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,7 +49,7 @@ export const ConversationalAgent = () => {
     guessedWords.length > 0 &&
     guessedWords.length < MAX_GUESSES_PER_ROUND;
 
-  // Toast on new category
+  // Toast on new theme
   useEffect(() => {
     if (currentWord && currentWord.id !== prevCurrentWord?.id) {
       showNotification({ type: 'round-start', payload: { roundNumber } });

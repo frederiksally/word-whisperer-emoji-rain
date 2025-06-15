@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useSound } from '@/contexts/SoundContext';
@@ -26,7 +25,7 @@ export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation }
                     <WordDisplay
                         wordToGuess={wordToGuess}
                         gameStatus={gameStatus}
-                        category={currentWord?.category}
+                        theme={currentWord?.theme}
                         guessedWords={guessedWords}
                         finalMessage={finalMessage}
                     />

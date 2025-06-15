@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { usePrevious } from '@/hooks/usePrevious';
@@ -5,12 +6,12 @@ import { usePrevious } from '@/hooks/usePrevious';
 interface WordDisplayProps {
     wordToGuess: string;
     gameStatus: 'playing' | 'won' | 'lost';
-    category: string | null | undefined;
+    theme: string | null | undefined;
     guessedWords: string[];
     finalMessage: string;
 }
 
-export const WordDisplay: React.FC<WordDisplayProps> = ({ wordToGuess, gameStatus, category, guessedWords, finalMessage }) => {
+export const WordDisplay: React.FC<WordDisplayProps> = ({ wordToGuess, gameStatus, theme, guessedWords, finalMessage }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
     const prevGuessedWords = usePrevious(guessedWords) ?? [];
@@ -133,7 +134,7 @@ export const WordDisplay: React.FC<WordDisplayProps> = ({ wordToGuess, gameStatu
     return (
         <div ref={containerRef} className="w-full flex flex-col items-center justify-center gap-4 p-4 text-center">
             <p className="text-4xl font-pilcrow">I'm thinking of a word...</p>
-            {category && <p className="text-lg text-white/70 font-pilcrow">Hint: The category is "{category}"</p>}
+            {theme && <p className="text-lg text-white/70 font-pilcrow">Hint: The theme is "{theme}"</p>}
             <div className="flex justify-center items-center gap-2 md:gap-4 p-4 min-h-[5rem]">
                 {characters.length > 0 ? characters.map((char, index) => (
                     <span
