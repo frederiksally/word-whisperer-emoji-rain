@@ -162,27 +162,30 @@ export type Database = {
       }
       words: {
         Row: {
-          category: string | null
+          clue: string | null
           created_at: string | null
           difficulty: Database["public"]["Enums"]["difficulty_level"]
           emoji: string
           id: string
+          theme: string | null
           word: string
         }
         Insert: {
-          category?: string | null
+          clue?: string | null
           created_at?: string | null
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
           emoji: string
           id?: string
+          theme?: string | null
           word: string
         }
         Update: {
-          category?: string | null
+          clue?: string | null
           created_at?: string | null
           difficulty?: Database["public"]["Enums"]["difficulty_level"]
           emoji?: string
           id?: string
+          theme?: string | null
           word?: string
         }
         Relationships: []
@@ -197,9 +200,8 @@ export type Database = {
         Returns: {
           id: string
           word: string
-          difficulty: Database["public"]["Enums"]["difficulty_level"]
-          category: string
-          emoji: string
+          theme: string
+          clue: string
         }[]
       }
     }

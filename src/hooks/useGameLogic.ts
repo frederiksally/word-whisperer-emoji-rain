@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -59,9 +60,9 @@ export const useGameLogic = () => {
       setCurrentWord(fallbackWord);
       return fallbackWord;
     }
-    // The 'as any' cast here is a temporary workaround for stale auto-generated Supabase types.
-    // The RPC returns 'theme' and 'clue' at runtime, but TypeScript doesn't know that yet.
-    const newWord = data[0] as any;
+    // The auto-generated Supabase types can be stale after a migration.
+    // We assert the correct type for the data returned from our updated RPC.
+    const newWord = (data as unknown as Word[])[0];
     const wordData = { id: newWord.id, word: newWord.word, theme: newWord.theme, clue: newWord.clue };
     setCurrentWord(wordData);
     return wordData;
