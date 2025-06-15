@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,7 +9,6 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -109,9 +107,9 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
              <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting} className="border-amber-800/50 hover:bg-amber-800/10">
                 Maybe Later
             </Button>
-            <AlertDialogAction type="submit" disabled={isSubmitting} className="font-boxing bg-amber-600 hover:bg-amber-700 text-stone-900 text-lg">
+            <Button type="submit" disabled={isSubmitting} className="font-boxing bg-amber-600 hover:bg-amber-700 text-stone-900 text-lg">
               {isSubmitting ? 'Carving...' : 'Claim My Spot!'}
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </form>
       </AlertDialogContent>
