@@ -83,7 +83,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
         } else {
             toast.error(`"${normalizedWord}" is not the word. Try again!`);
             const guessesLeft = MAX_GUESSES_PER_ROUND - newGuessedWords.length;
-            return `The user's guess "${normalizedWord}" was INCORRECT. They have ${guessesLeft} guesses left for this round. Encourage them to try again. Use the secret clue to give them a clever hint.`;
+            return `The user's guess "${normalizedWord}" was INCORRECT. They have ${guessesLeft} guesses left for this round. Encourage them to try again. Give them a clever hint.`;
         }
       }
     },
@@ -98,7 +98,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
         return "The game hasn't started yet. The user needs to say 'start game'.";
       }
       if (gameStatus === 'won' || gameStatus === 'lost') {
-        return `The round is over. The word was "${wordToGuess}". The user's total score is ${totalScore}. The user can start the next round by saying "next word" or see the leaderboard if the game is over.`;
+        return `The round is over. The word was "${wordToGuess}". The user's total score is ${totalScore}.`;
       }
       if (!wordToGuess) {
         return "The game is loading. I'm picking a word.";
