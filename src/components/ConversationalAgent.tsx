@@ -161,11 +161,8 @@ export const ConversationalAgent = () => {
   };
 
   const handlePlayAgain = () => {
-    if (isConnected) {
-        clientTools.resetGame();
-    } else {
-        handleStartConversation();
-    }
+    actions.resetMatchState();
+    stopMusic();
   }
 
   // --- Test Handlers for DevTools ---
