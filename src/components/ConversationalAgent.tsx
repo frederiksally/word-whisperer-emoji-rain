@@ -179,16 +179,20 @@ export const ConversationalAgent = () => {
       {!states.matchId ? (
          <div className="flex-grow flex flex-col items-center justify-center gap-6 p-6 relative">
             <img src="/graphics/guess-off-logo01.png" alt="Guess Off Logo" className="w-2/3 max-w-lg" />
-            <p className="text-white/80 max-w-md text-center font-pilcrow">
+            <p className="text-white/80 max-w-md text-center font-pilcrow text-lg">
               Welcome to The Great Guess-Off, partner.
               <br/>
               Tex is thinkin&apos; of a word — your job is to guess it before he roasts you into next week. Talk fast, think sharp, and don&apos;t let that cowboy outwit ya.
             </p>
-            <div className="text-sm font-mono p-2 bg-black/30 text-white/80 rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
-            <Button onClick={() => { playSound('buttonClick'); handleStartConversation(); }} disabled={isConnecting} size="lg" className="font-boxing text-2xl animate-pulse">
+            <Button 
+              onClick={() => { playSound('buttonClick'); handleStartConversation(); }} 
+              disabled={isConnecting} 
+              size="lg" 
+              className="font-boxing text-2xl uppercase animate-button-pulse bg-amber-500 hover:bg-amber-600 text-stone-900"
+            >
                 {isConnecting ? 'Starting...' : 'Start Game'}
             </Button>
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full text-center">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full text-center">
               <h3 className="font-pilcrow text-sm uppercase tracking-widest text-white/70 mb-2">Built With</h3>
               <div className="flex justify-center items-center gap-8">
                 <img src="/graphics/lovable-logo.svg" alt="Lovable Logo" className="h-4" />
