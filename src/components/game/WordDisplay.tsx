@@ -87,8 +87,8 @@ export const WordDisplay: React.FC<WordDisplayProps> = ({ wordToGuess, gameStatu
 
     return (
         <div ref={containerRef} className="w-full flex flex-col items-center justify-center gap-4 p-4 text-center">
-            <p className="text-2xl font-pilcrow">I'm thinking of a word...</p>
-            {category && <p className="text-sm text-white/70 font-pilcrow">Hint: The category is "{category}"</p>}
+            <p className="text-4xl font-pilcrow">I'm thinking of a word...</p>
+            {category && <p className="text-lg text-white/70 font-pilcrow">Hint: The category is "{category}"</p>}
             <div className="flex justify-center items-center gap-2 md:gap-4 p-4 min-h-[5rem]">
                 {characters.length > 0 ? characters.map((char, index) => (
                     <span
