@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -83,6 +84,12 @@ export const useGameLogic = () => {
     return null;
   }, [fetchNewWord]);
   
+  const prepareNewMatch = useCallback(() => {
+    resetMatchState();
+    const newMatchId = crypto.randomUUID();
+    setMatchId(newMatchId);
+  }, [resetMatchState]);
+  
   const startNewMatch = useCallback(async () => {
     const newMatchId = crypto.randomUUID();
     resetMatchState();
@@ -148,6 +155,7 @@ export const useGameLogic = () => {
       setFinalMessage,
     },
     actions: {
+      prepareNewMatch,
       resetMatchState,
       resetRoundState,
       fetchNewWord,

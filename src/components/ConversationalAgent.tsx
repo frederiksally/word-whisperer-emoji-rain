@@ -94,12 +94,7 @@ export const ConversationalAgent = () => {
   const handleStartConversation = async () => {
     setIsConnecting(true);
     
-    const newWordData = await actions.startNewMatch();
-    if (!newWordData) {
-      showNotification({ message: "Could not start game. Please try again.", type: 'error' });
-      setIsConnecting(false);
-      return;
-    }
+    actions.prepareNewMatch();
 
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
