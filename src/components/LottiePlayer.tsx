@@ -1,21 +1,19 @@
-import React from 'react';
-import Lottie, { LottieRef, AnimationEventCallback } from 'lottie-react';
 
-// By creating a specific interface for our wrapper, we avoid complex type
-// inference issues that can arise from lottie-react's union-based prop types.
-// We explicitly list the props our wrapper will accept and pass through.
-interface LottiePlayerProps {
+import React from 'react';
+import Lottie, { LottieProps } from 'lottie-react';
+
+// To create a robust wrapper, we base our component's props on the
+// LottieProps type exported by the 'lottie-react' library.
+// We then Omit the original 'path' and 'animationData' props to prevent
+// ambiguity and introduce our own required 'animationDataPath' prop.
+// This ensures our wrapper has a clear and type-safe interface.
+interface LottiePlayerProps extends Omit<LottieProps, 'path' | 'animationData'> {
   animationDataPath: string;
-  className?: string;
-  loop?: boolean | number;
-  autoplay?: boolean;
-  onComplete?: AnimationEventCallback;
-  lottieRef?: LottieRef;
-  // Other props from lottie-react can be added here if needed
 }
 
-export const LottiePlayer: React.FC<LottiePlayerProps> = ({ animationDataPath, ...props }) => {
-    // The `lottie-react` component can handle fetching from a path directly.
-    // This avoids issues with trying to parse compressed .lottie files as JSON.
-    return <Lottie path={animationDataPath} {...props} />;
+export const LottiePlayer: React.FC<LottiePlayerProps> = ({ animationDataPath, ...rest }) => {
+    // We map our 'animationDataPath' prop to the 'path' prop expected by the Lottie component.
+    // The rest of the props (...rest) are passed through directly. This is type-safe
+    // because our LottiePlayerProps is derived from the library's own LottieProps.
+    return <Lottie path={animationDataPath} {...rest} />;
 };
