@@ -9,8 +9,8 @@ interface TexAvatarProps {
 export const TexAvatar: React.FC<TexAvatarProps> = ({ isConnected }) => {
   return (
     <div className="relative">
-      <Avatar className="h-24 w-24 border-4 border-amber-500 shadow-xl">
-        <AvatarImage src="/graphics/tex-profile.png" alt="Tex" />
+      <Avatar className="h-32 w-32 border-4 border-amber-500 shadow-xl">
+        <AvatarImage src="/graphics/tex-profile.png" alt="Tex" className="object-cover" />
         <AvatarFallback>Tex</AvatarFallback>
       </Avatar>
       {/* Pulsing "Live" indicator */}
