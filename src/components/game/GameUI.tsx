@@ -22,7 +22,7 @@ export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation }
             <div className="md:col-span-2 w-full flex flex-col items-center justify-center gap-4 p-4">
                 <div className="text-center flex-grow flex flex-col justify-center">
                     <p className="text-lg">I'm thinking of a word...</p>
-                    {currentWord?.category && <p className="text-sm text-muted-foreground">Hint: The category is "{currentWord.category}"</p>}
+                    {currentWord?.category && <p className="text-sm text-white/70">Hint: The category is "{currentWord.category}"</p>}
                     <p className="text-4xl font-bold tracking-widest p-4">
                         {wordToGuess ? (gameStatus !== 'playing' ? wordToGuess : wordToGuess.split('').map(() => '_').join('')) : '...'}
                     </p>
@@ -31,9 +31,9 @@ export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation }
                     {finalMessage && <p className="text-blue-500 font-bold text-lg">{finalMessage}</p>}
                 </div>
 
-                <div className="w-full p-4 border rounded-lg bg-background">
+                <div className="w-full p-4 border rounded-lg bg-black/30 border-white/20">
                     <h3 className="font-semibold mb-2">What I'm hearing:</h3>
-                    <p className="text-sm text-muted-foreground italic min-h-[20px]">
+                    <p className="text-sm text-white/70 italic min-h-[20px]">
                         {lastUserTranscript || '...'}
                     </p>
                 </div>

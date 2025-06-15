@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +12,7 @@ import { useSound } from '@/contexts/SoundContext';
 import { usePrevious } from '@/hooks/usePrevious';
 import { useGameNotification } from '@/contexts/GameNotificationContext';
 import { GameScore } from './game/GameScore';
+import { BackgroundManager } from './game/BackgroundManager';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
@@ -146,11 +148,25 @@ export const ConversationalAgent = () => {
   }, [status, isConnecting, actions, states.matchId, states.showLeaderboardPrompt, states.showLeaderboardDisplay, showNotification]);
 
   if (states.showLeaderboardDisplay) {
-    return <LeaderboardDisplay onPlayAgain={handlePlayAgain} />;
+    return (
+        <>
+            <BackgroundManager 
+                roundNumber={roundNumber}
+                matchId={matchId}
+                showLeaderboardDisplay={showLeaderboardDisplay}
+            />
+            <LeaderboardDisplay onPlayAgain={handlePlayAgain} />
+        </>
+    );
   }
   
   return (
-    <div className="w-full h-screen flex flex-col">
+    <div className="w-full h-screen flex flex-col text-white">
+      <BackgroundManager 
+        roundNumber={roundNumber}
+        matchId={matchId}
+        showLeaderboardDisplay={showLeaderboardDisplay}
+      />
       <LeaderboardPromptDialog
         isOpen={states.showLeaderboardPrompt}
         totalScore={states.totalScore}
@@ -163,10 +179,10 @@ export const ConversationalAgent = () => {
       {!states.matchId ? (
          <div className="flex-grow flex flex-col items-center justify-center gap-6 p-6">
             <h1 className="text-4xl font-bold font-boxing tracking-wider">Word Guessing Game</h1>
-            <p className="text-muted-foreground max-w-md text-center">
+            <p className="text-white/80 max-w-md text-center">
               Talk to our AI agent to guess the secret word! Press Start Game and allow microphone access to begin.
             </p>
-            <div className="text-sm font-mono p-2 bg-muted rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
+            <div className="text-sm font-mono p-2 bg-black/30 text-white/80 rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
             <Button onClick={() => { playSound('buttonClick'); handleStartConversation(); }} disabled={isConnecting} size="lg">
                 {isConnecting ? 'Starting...' : 'Start Game'}
             </Button>
@@ -179,12 +195,12 @@ export const ConversationalAgent = () => {
                 attemptsText={attemptsText}
                 isLowOnGuesses={isLowOnGuesses}
             />
-            <header className="flex-shrink-0 py-2 px-8 border-b flex justify-between items-center">
+            <header className="flex-shrink-0 py-2 px-8 border-b border-white/20 flex justify-between items-center bg-black/20 backdrop-blur-sm">
                 <div>
                     <h1 className="text-xl font-bold">Word Guessing Game</h1>
-                    <p className="text-sm text-muted-foreground">Round {states.roundNumber} of {MAX_ROUNDS}</p>
+                    <p className="text-sm text-white/70">Round {states.roundNumber} of {MAX_ROUNDS}</p>
                 </div>
-                <div className="text-sm font-mono p-2 bg-muted rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
+                <div className="text-sm font-mono p-2 bg-black/30 text-white/80 rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
             </header>
             <main className="flex-grow overflow-hidden">
                  {!isConnected ? (

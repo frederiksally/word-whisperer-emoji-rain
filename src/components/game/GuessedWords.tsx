@@ -77,7 +77,7 @@ export const GuessedWords: React.FC<GuessedWordsProps> = ({ guessedWords, wordTo
             {guessedWords.length > 0 && (
                 <ul ref={listRef} className="space-y-4 w-full">
                     {guessedWords.map((word, index) => (
-                        <li key={index} className="relative w-fit font-boxing text-5xl md:text-6xl text-foreground uppercase">
+                        <li key={index} className="relative w-fit font-boxing text-5xl md:text-6xl text-white uppercase">
                             <span>{word}</span>
                             {word === wordToGuess && (
                                 <>
@@ -88,7 +88,7 @@ export const GuessedWords: React.FC<GuessedWordsProps> = ({ guessedWords, wordTo
                                 </>
                             )}
                             {word !== wordToGuess && (
-                                <div className="strike-through absolute top-1/2 left-0 w-full h-1.5 md:h-2 bg-foreground transform -translate-y-1/2 origin-left scale-x-0"></div>
+                                <div className="strike-through absolute top-1/2 left-0 w-full h-1.5 md:h-2 bg-white transform -translate-y-1/2 origin-left scale-x-0"></div>
                             )}
                         </li>
                     ))}
