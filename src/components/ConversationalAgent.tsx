@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +14,7 @@ import { useGameNotification } from '@/contexts/GameNotificationContext';
 import { GameScore } from './game/GameScore';
 import { BackgroundManager } from './game/BackgroundManager';
 import GameWinOverlay from './game/GameWinOverlay';
+import { DevTools } from './DevTools';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
@@ -171,6 +173,32 @@ export const ConversationalAgent = () => {
     }
   }
 
+  // --- Test Handlers for DevTools ---
+  const handleTestWin = () => {
+    actions.resetMatchState();
+    setters.setMatchId('test-match-id');
+    setters.setGameStatus('won');
+    setters.setTotalScore(1250);
+    setters.setRoundNumber(MAX_ROUNDS);
+    setters.setIsAwaitingLeaderboard(true);
+  };
+
+  const handleTestLeaderboardPrompt = () => {
+    actions.resetMatchState();
+    setters.setMatchId('test-match-id');
+    setters.setTotalScore(1250); // A score high enough to trigger prompt
+    setters.setShowLeaderboardPrompt(true);
+  };
+
+  const handleTestLeaderboard = () => {
+    actions.resetMatchState();
+    setters.setMatchId('test-match-id');
+    stopMusic();
+    playMusic('leaderboardMusic');
+    setters.setShowLeaderboardDisplay(true);
+  };
+  // --- End Test Handlers ---
+
   const isConnected = status === 'connected';
 
   useEffect(() => {
@@ -200,6 +228,14 @@ export const ConversationalAgent = () => {
   
   return (
     <div className="w-full h-screen flex flex-col text-white">
+      {/* DevTools for testing end-game flows, hidden on leaderboard */}
+      {!states.showLeaderboardDisplay && (
+        <DevTools
+          onTestWin={handleTestWin}
+          onTestLeaderboardPrompt={handleTestLeaderboardPrompt}
+          onTestLeaderboard={handleTestLeaderboard}
+        />
+      )}
       {showGameWinOverlay && <GameWinOverlay onAnimationComplete={() => {
         setShowGameWinOverlay(false);
         // This is the final step: show the leaderboard prompt/display
