@@ -10,9 +10,9 @@ export const soundConfig = {
   roundWin: '/sounds/level-win.mp3',
   roundLose: '/sounds/level-lose.mp3',
   gameWin: '/sounds/game-win.mp3',
-  roundIntroduction: '/sounds/round-introduction.mp3',
 
   // UI Sounds
+  buttonClick: 'https://raw.githubusercontent.com/sfbg/kor-sfx-rpg/master/mp3/ui/cursor_select.mp3', // No local file provided for this
   gameStart: '/sounds/game-start.mp3',
 };
 

@@ -69,7 +69,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
             return `The user's guess "${normalizedWord}" was CORRECT. They won the round and scored ${roundScore} points. Their total score is now ${newTotalScore}. Now, ask them if they are ready for the next round. If they give an affirmative answer, you MUST call the startNextRound tool.`;
         } else {
             actions.endGameAndCheckLeaderboard(newTotalScore);
-            return `The user's guess "${normalizedWord}" was CORRECT. They won the final round, scoring ${roundScore} points. This was the last round! Their final total score is ${newTotalScore}. Give them a congratulatory sign-off message as the leaderboard is about to be shown, and YOU MUST end your response with '[system: end_call]'.`;
+            return `The user's guess "${normalizedWord}" was CORRECT. They won the final round, scoring ${roundScore} points. This was the last round! Their final total score is ${newTotalScore}. I'll show you the leaderboard now.`;
         }
       } else {
         if (newGuessedWords.length >= MAX_GUESSES_PER_ROUND) {
@@ -80,7 +80,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
                 return `The user ran out of guesses. The round is over. The word was "${wordToGuess}". Tell them not to worry, and ask if they are ready for the next round. If they give an affirmative answer, you MUST call the startNextRound tool.`;
             } else {
                 actions.endGameAndCheckLeaderboard(totalScore);
-                return `The user ran out of guesses on the final round. The game is over. The word was "${wordToGuess}". Their final score is ${totalScore}. Give them a sympathetic but encouraging sign-off message as the leaderboard is about to be shown, and YOU MUST end your response with '[system: end_call]'.`;
+                return `The user ran out of guesses on the final round. The game is over. The word was "${wordToGuess}". Their final score is ${totalScore}. I'll show you the leaderboard now.`;
             }
         } else {
             toast.error(`"${normalizedWord}" is not the word. Try again!`);
@@ -134,7 +134,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
       }
       if (roundNumber >= MAX_ROUNDS) {
           actions.endGameAndCheckLeaderboard(totalScore);
-          return `The game is already over as all ${MAX_ROUNDS} rounds are complete. The user's final score is ${totalScore}. Give them a final sign-off message as the leaderboard is shown. YOU MUST end your response with '[system: end_call]'.`;
+          return `The game is already over. You have completed all ${MAX_ROUNDS} rounds. Their final score is ${totalScore}. I'll show you the leaderboard now.`;
       }
 
       const nextRound = roundNumber + 1;

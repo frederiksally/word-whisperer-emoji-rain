@@ -4,14 +4,14 @@ import { Howl, Howler } from 'howler';
 import { soundConfig, SoundKey } from '@/config/sounds';
 
 // Ensure the master volume is enabled.
-Howler.volume(0.7);
+Howler.volume(1.0);
 
 type SoundMap = {
   [key in SoundKey]?: Howl;
 };
 
 // Preload sounds for instant feedback
-const soundsToPreload: SoundKey[] = ['gameStart', 'guessCorrect', 'guessIncorrect'];
+const soundsToPreload: SoundKey[] = ['buttonClick', 'gameStart', 'guessCorrect', 'guessIncorrect'];
 
 export const useSoundManager = () => {
   const soundInstances = useRef<SoundMap>({});
@@ -77,7 +77,7 @@ export const useSoundManager = () => {
     }
     
     music.play();
-    music.fade(0, 0.3, 1000); // Fade in to 0.3 volume over 1s
+    music.fade(0, 0.5, 1000); // Fade in to 0.5 volume over 1s
     currentMusicKey.current = key;
   }, []);
 
