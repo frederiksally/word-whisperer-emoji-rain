@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,6 +40,7 @@ export const ConversationalAgent = () => {
   const prevMatchId = usePrevious(matchId);
   const prevCurrentWord = usePrevious(currentWord);
   const prevIsSpeaking = usePrevious(isSpeaking);
+  const prevIsAwaitingLeaderboard = usePrevious(isAwaitingLeaderboard);
 
   const attemptsText = gameStatus === 'playing'
     ? `${guessedWords.length} / ${MAX_GUESSES_PER_ROUND}`
@@ -99,11 +101,11 @@ export const ConversationalAgent = () => {
     }
   }, [matchId, prevMatchId, showLeaderboardDisplay, prevShowLeaderboardDisplay, playSound, playMusic, stopMusic]);
 
-  // NEW: This effect orchestrates the entire end-game cinematic sequence.
-  // It now waits for the agent to finish its final speech before starting.
+  // This effect orchestrates the end-game sequence, triggering immediately
+  // when the game enters the 'isAwaitingLeaderboard' state for a more responsive feel.
   useEffect(() => {
-    // Condition: Game has ended, and AI just finished speaking.
-    if (isAwaitingLeaderboard && prevIsSpeaking && !isSpeaking) {
+    // We only want this to fire once on the transition from false to true.
+    if (!prevIsAwaitingLeaderboard && isAwaitingLeaderboard) {
       if (gameStatus === 'won') {
         // --- Grand Win Sequence ---
         playSound('roundWin');
@@ -113,11 +115,12 @@ export const ConversationalAgent = () => {
             stopMusic();
         }, 1000);
 
+        // Shortened delay for a snappier feel
         setTimeout(() => {
           setShowGameWinOverlay(true);
-        }, 2500);
+        }, 1500);
 
-      } else {
+      } else if (gameStatus === 'lost') {
         // --- Final Round Loss Sequence ---
         playSound('roundLose');
         showNotification({ message: `Round over! The word was "${wordToGuess}".`, type: 'info' });
@@ -126,7 +129,17 @@ export const ConversationalAgent = () => {
         }, 2000);
       }
     }
-  }, [isAwaitingLeaderboard, isSpeaking, prevIsSpeaking, gameStatus, actions, totalScore, showNotification, playSound, stopMusic, wordToGuess]);
+  }, [
+    isAwaitingLeaderboard, 
+    prevIsAwaitingLeaderboard, 
+    gameStatus, 
+    actions, 
+    totalScore, 
+    showNotification, 
+    playSound, 
+    stopMusic, 
+    wordToGuess
+  ]);
 
   const handleStartConversation = async () => {
     setIsConnecting(true);
