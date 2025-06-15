@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { useSound } from '@/contexts/SoundContext';
@@ -12,6 +11,12 @@ export const RoundAnnouncement: React.FC<RoundAnnouncementProps> = ({ roundNumbe
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLHeadingElement>(null);
   const { playSound } = useSound();
+  const onCompleteRef = useRef(onComplete);
+
+  // Keep the ref updated with the latest onComplete function to avoid it as a dependency
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     playSound('roundIntroduction');
@@ -20,7 +25,7 @@ export const RoundAnnouncement: React.FC<RoundAnnouncementProps> = ({ roundNumbe
             gsap.to(containerRef.current, { 
                 opacity: 0, 
                 duration: 0.3,
-                onComplete: onComplete
+                onComplete: () => onCompleteRef.current()
             });
         }
     });
@@ -28,7 +33,7 @@ export const RoundAnnouncement: React.FC<RoundAnnouncementProps> = ({ roundNumbe
     
     tl.from(textRef.current, { scale: 3, opacity: 0, duration: 0.8, ease: 'power3.out' })
       .to(textRef.current, { opacity: 0, duration: 0.5, ease: 'power2.in', delay: 1.2 });
-  }, [onComplete, playSound]);
+  }, [roundNumber, playSound]);
 
   return (
     <div ref={containerRef} className="fixed inset-0 flex items-center justify-center bg-black/50 z-[200] pointer-events-auto">

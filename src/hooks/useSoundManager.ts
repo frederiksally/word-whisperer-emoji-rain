@@ -1,3 +1,4 @@
+
 import { useRef, useCallback, useEffect } from 'react';
 import { Howl, Howler } from 'howler';
 import { soundConfig, SoundKey } from '@/config/sounds';
@@ -10,7 +11,7 @@ type SoundMap = {
 };
 
 // Preload sounds for instant feedback
-const soundsToPreload: SoundKey[] = ['gameStart', 'guessCorrect', 'guessIncorrect']; // Removed 'buttonClick'
+const soundsToPreload: SoundKey[] = ['gameStart', 'guessCorrect', 'guessIncorrect', 'roundIntroduction'];
 
 export const useSoundManager = () => {
   const soundInstances = useRef<SoundMap>({});
