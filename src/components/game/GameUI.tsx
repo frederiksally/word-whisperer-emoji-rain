@@ -1,10 +1,12 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useSound } from '@/contexts/SoundContext';
 import { GuessedWords } from './GuessedWords';
 import { WordDisplay } from './WordDisplay';
+import { TexAvatar } from './TexAvatar';
 
-export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation }: any) => {
+export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation, isConnected }: { gameLogic: any, lastUserTranscript: string, handleStopConversation: () => void, isConnected: boolean }) => {
     const { states } = gameLogic;
     const { playSound } = useSound();
     const {
@@ -17,6 +19,11 @@ export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation }
             {/* Guessed words list. On desktop, it's an absolute sidebar. On mobile, it's a block at the top. */}
             <div className="w-full h-1/3 md:absolute md:left-0 md:top-0 md:w-1/3 md:h-full">
                 <GuessedWords guessedWords={guessedWords} wordToGuess={wordToGuess} />
+            </div>
+            
+            {/* Tex Avatar - shows on desktop */}
+            <div className="absolute top-8 right-8 z-20 hidden md:block">
+                <TexAvatar isConnected={isConnected} />
             </div>
 
             {/* Main content area. Takes full page width on desktop to allow for true centering. */}
