@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -72,7 +71,7 @@ export const ConversationalAgent = () => {
 
   // Sound and Toast on round end (for intermediate rounds)
   useEffect(() => {
-    // This effect now only handles non-final rounds. The final round is handled
+    // This effect handles non-final rounds. The final round is handled
     // by the isAwaitingLeaderboard effect.
     if (prevGameStatus === 'playing' && gameStatus !== 'playing' && !isAwaitingLeaderboard) {
       if (gameStatus === 'won') {
@@ -92,6 +91,8 @@ export const ConversationalAgent = () => {
       playSound('gameStart');
       playMusic('roundMusic');
     }
+    // When the leaderboard appears, stop round music and start leaderboard music.
+    // This transition is now cleaner.
     if (showLeaderboardDisplay && !prevShowLeaderboardDisplay) {
       stopMusic();
       playMusic('leaderboardMusic');
@@ -103,22 +104,33 @@ export const ConversationalAgent = () => {
     if (isAwaitingLeaderboard && !prevIsAwaitingLeaderboard) {
       // The AI has signaled the game is over.
       if (gameStatus === 'won') {
-        // Full game win scenario
-        showNotification({ message: 'Congratulations, you won the whole game!', type: 'success', duration: 5000 });
+        // --- Grand Win Sequence ---
+        // 1. Play the final round win sound immediately.
+        playSound('roundWin');
+        showNotification({ message: `You won the final round!`, type: 'success', duration: 2000 });
         
-        // Wait for the final word's reveal animation to have its moment
+        // 2. Pause briefly to let the round win sink in, then fade out round music.
+        setTimeout(() => {
+            stopMusic();
+        }, 1000);
+
+        // 3. After another pause, show the main "YOU WON" overlay.
+        // This overlay handles its own 'gameWin' sound and animations.
         setTimeout(() => {
           setShowGameWinOverlay(true);
         }, 2500);
+
       } else {
-        // Game loss scenario on the final round
-        // Wait a bit before showing the leaderboard
+        // --- Final Round Loss Sequence ---
+        playSound('roundLose');
+        showNotification({ message: `Round over! The word was "${wordToGuess}".`, type: 'info' });
+        // Wait a bit before showing the leaderboard to let the loss register.
         setTimeout(() => {
           actions.displayLeaderboard(totalScore);
         }, 2000);
       }
     }
-  }, [isAwaitingLeaderboard, prevIsAwaitingLeaderboard, gameStatus, actions, totalScore, showNotification]);
+  }, [isAwaitingLeaderboard, prevIsAwaitingLeaderboard, gameStatus, actions, totalScore, showNotification, playSound, stopMusic, wordToGuess]);
 
   const handleStartConversation = async () => {
     setIsConnecting(true);
@@ -179,7 +191,9 @@ export const ConversationalAgent = () => {
                 matchId={matchId}
                 showLeaderboardDisplay={showLeaderboardDisplay}
             />
-            <LeaderboardDisplay onPlayAgain={handlePlayAgain} />
+            <div className="w-full h-screen flex items-center justify-center p-4">
+                <LeaderboardDisplay onPlayAgain={handlePlayAgain} />
+            </div>
         </>
     );
   }

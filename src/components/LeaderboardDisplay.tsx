@@ -39,41 +39,41 @@ export const LeaderboardDisplay = ({ onPlayAgain }: { onPlayAgain: () => void })
   const { playSound } = useSound();
 
   return (
-    <Card className="w-full max-w-lg mx-auto">
+    <Card className="w-full max-w-lg mx-auto bg-stone-900/80 border-amber-500/50 text-white font-pilcrow backdrop-blur-sm">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Top Players</CardTitle>
-        <CardDescription className="text-center text-muted-foreground">
-          See who is topping the charts in our Word Guessing Game!
+        <CardTitle className="text-3xl font-boxing text-amber-400 text-center tracking-wider" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>The GUESS-OFF LEGENDS</CardTitle>
+        <CardDescription className="text-center text-white/70">
+          These are the sharpshooters who tamed Tex. For now.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col items-center justify-center gap-6 p-6">
+      <CardContent className="flex flex-col items-center justify-center gap-6 p-4 md:p-6">
         {isLoading && (
           <div className="w-full space-y-2">
-            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full bg-white/10" />)}
           </div>
         )}
-        {isError && <p className="text-red-500">Could not load the leaderboard.</p>}
+        {isError && <p className="text-red-400">Could not load the leaderboard.</p>}
         {leaderboard && (
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[50px]">Rank</TableHead>
-                <TableHead>Player</TableHead>
-                <TableHead className="text-right">Score</TableHead>
+              <TableRow className="border-b-amber-500/30">
+                <TableHead className="w-[50px] text-amber-400/80">Rank</TableHead>
+                <TableHead className="text-amber-400/80">Legend</TableHead>
+                <TableHead className="text-right text-amber-400/80">Score</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {leaderboard.map((entry, index) => (
-                <TableRow key={entry.id}>
-                  <TableCell className="font-medium">{index + 1}</TableCell>
-                  <TableCell>{entry.player_name}</TableCell>
-                  <TableCell className="text-right">{entry.total_score}</TableCell>
+                <TableRow key={entry.id} className="border-b-amber-500/20">
+                  <TableCell className="font-medium text-amber-400">{index + 1}</TableCell>
+                  <TableCell className="font-bold">{entry.player_name}</TableCell>
+                  <TableCell className="text-right text-lg font-bold">{entry.total_score}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         )}
-        <Button onClick={() => { playSound('buttonClick'); onPlayAgain(); }} className="mt-4">Play Again</Button>
+        <Button onClick={() => { playSound('buttonClick'); onPlayAgain(); }} size="lg" className="mt-4 font-boxing text-2xl uppercase bg-amber-500 hover:bg-amber-600 text-stone-900 animate-button-pulse">Go Again</Button>
       </CardContent>
     </Card>
   );
