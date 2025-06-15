@@ -1,6 +1,6 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { triggerNotification } from '@/contexts/GameNotificationContext';
 
 // Define the type for our word object
 type Word = {
@@ -53,6 +53,7 @@ export const useGameLogic = () => {
   };
 
   const fetchNewWord = useCallback(async (): Promise<Word | null> => {
+    triggerNotification({ type: 'info', message: 'Roping in a new word...' });
     const { data, error } = await supabase.rpc('get_random_word');
     if (error || !data || data.length === 0) {
       console.error('Failed to fetch new word, using fallback.', error);
@@ -110,6 +111,7 @@ export const useGameLogic = () => {
   }, [resetMatchState, startNewRoundLogic]);
 
   const displayLeaderboard = useCallback(async (finalScore: number) => {
+    triggerNotification({ type: 'info', message: 'Tallying up the leaderboard...' });
     const { data, error } = await supabase
       .from('match_leaderboard')
       .select('total_score')

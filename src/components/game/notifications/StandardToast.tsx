@@ -12,21 +12,15 @@ interface Props extends StandardToastProps {
 const toastConfig = {
   success: {
     icon: CheckCircle2,
-    containerClasses: 'border-green-800/50 bg-green-100/90',
-    iconClasses: 'text-green-700',
-    textClasses: 'text-green-900',
+    iconClasses: 'text-green-400',
   },
   error: {
     icon: XCircle,
-    containerClasses: 'border-red-800/50 bg-red-100/90',
-    iconClasses: 'text-red-700',
-    textClasses: 'text-red-900',
+    iconClasses: 'text-red-400',
   },
   info: {
     icon: Info,
-    containerClasses: 'border-amber-800/50 bg-[#fefae0]/90',
-    iconClasses: 'text-amber-800',
-    textClasses: 'text-stone-800',
+    iconClasses: 'text-sky-400',
   },
 };
 
@@ -59,14 +53,11 @@ export const StandardToast: React.FC<Props> = ({ id, message, type, visible, onD
   return (
     <li
       ref={toastRef}
-      className={cn(
-        'flex items-center justify-center gap-3 rounded-lg border-2 p-3 shadow-lg backdrop-blur-sm',
-        config.containerClasses
-      )}
+      className="flex items-center justify-center gap-3 rounded-lg border-2 border-amber-600/50 bg-stone-900/80 p-3 shadow-lg backdrop-blur-sm"
       role="alert"
     >
       <IconComponent className={cn('h-7 w-7 flex-shrink-0', config.iconClasses)} />
-      <span className={cn('font-boxing text-2xl text-center', config.textClasses)}>
+      <span className="font-boxing text-2xl text-center text-amber-100">
         {message}
       </span>
     </li>

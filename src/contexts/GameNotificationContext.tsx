@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
 export type GameNotificationType = 'success' | 'error' | 'info' | 'round-start';
@@ -26,6 +25,11 @@ interface GameNotificationContextType {
 const GameNotificationContext = createContext<GameNotificationContextType | undefined>(undefined);
 
 let notificationCount = 0;
+
+let staticShowNotification: GameNotificationContextType['showNotification'] = () => {
+  // This is a placeholder, it will be replaced when the provider mounts.
+  // This prevents errors if called before the provider is ready.
+};
 
 export const GameNotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<GameNotification[]>([]);
@@ -63,6 +67,8 @@ export const GameNotificationProvider: React.FC<{ children: ReactNode }> = ({ ch
     }
   }, [hideNotification]);
 
+  staticShowNotification = showNotification;
+
 
   return (
     <GameNotificationContext.Provider value={{ notifications, showNotification, removeNotification }}>
@@ -77,4 +83,8 @@ export const useGameNotification = () => {
     throw new Error('useGameNotification must be used within a GameNotificationProvider');
   }
   return context;
+};
+
+export const triggerNotification: GameNotificationContextType['showNotification'] = (options) => {
+  staticShowNotification(options);
 };
