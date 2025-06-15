@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,12 +13,10 @@ import { usePrevious } from '@/hooks/usePrevious';
 import { useGameNotification } from '@/contexts/GameNotificationContext';
 import { GameScore } from './game/GameScore';
 import { BackgroundManager } from './game/BackgroundManager';
-import { LottiePlayer } from './LottiePlayer';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [lastUserTranscript, setLastUserTranscript] = useState('');
-  const [showConfetti, setShowConfetti] = useState(false);
   const { playSound, playMusic, stopMusic } = useSound();
   const { showNotification } = useGameNotification();
   
@@ -75,7 +74,6 @@ export const ConversationalAgent = () => {
         playSound('roundWin');
         if (roundNumber === MAX_ROUNDS) {
           playSound('gameWin');
-          setShowConfetti(true);
           showNotification({ message: 'Congratulations, you won the whole game!', type: 'success', duration: 5000 });
         } else {
           showNotification({ message: `You won round ${roundNumber}!`, type: 'success' });
@@ -164,16 +162,6 @@ export const ConversationalAgent = () => {
   
   return (
     <div className="w-full h-screen flex flex-col text-white">
-      {showConfetti && (
-        <div className="absolute inset-0 z-[300] pointer-events-none flex items-center justify-center">
-          <LottiePlayer
-            animationDataPath="/graphics/lottie/confetti.lottie"
-            loop={false}
-            onComplete={() => setShowConfetti(false)}
-            className="w-full h-full"
-          />
-        </div>
-      )}
       <BackgroundManager 
         roundNumber={roundNumber}
         matchId={matchId}
@@ -224,7 +212,7 @@ export const ConversationalAgent = () => {
             <main className="flex-grow overflow-hidden relative">
                  {!isConnected ? (
                     <div className="text-center h-full flex flex-col items-center justify-center">
-                        <LottiePlayer animationDataPath="/graphics/lottie/loading.lottie" className="w-64 h-64" />
+                        <p className="text-2xl font-bold">Connecting to agent...</p>
                     </div>
                 ) : (
                   <GameUI 
