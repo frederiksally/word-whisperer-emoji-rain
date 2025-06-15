@@ -209,10 +209,10 @@ export const ConversationalAgent = () => {
             <img 
               src="/graphics/tex-character.png" 
               alt="Tex the cowboy" 
-              className="absolute bottom-0 left-0 w-[40%] max-w-md z-10 pointer-events-none"
+              className="absolute bottom-0 left-1/2 -translate-x-[80%] w-[45%] max-w-lg z-10 pointer-events-none"
             />
             <div className="relative z-20 flex flex-col items-center justify-center gap-6 text-center">
-              <img src="/graphics/guess-off-logo01.png" alt="Guess Off Logo" className="w-2/3 max-w-lg" />
+              <img src="/graphics/guess-off-logo01.png" alt="Guess Off Logo" className="w-full max-w-xl" />
               <p className="text-white/80 max-w-md font-pilcrow text-lg">
                 Welcome to The Great Guess-Off, partner.
                 <br/>

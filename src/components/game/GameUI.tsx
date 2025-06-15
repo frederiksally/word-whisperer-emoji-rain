@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useSound } from '@/contexts/SoundContext';
@@ -22,7 +21,7 @@ export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation, 
             </div>
             
             {/* Tex Avatar - shows on desktop */}
-            <div className="absolute top-8 right-8 z-20 hidden md:block">
+            <div className="absolute bottom-8 right-8 z-20 hidden md:block">
                 <TexAvatar isConnected={isConnected} />
             </div>
 
