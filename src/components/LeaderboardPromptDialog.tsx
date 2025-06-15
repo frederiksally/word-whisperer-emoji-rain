@@ -35,33 +35,40 @@ interface Props {
 }
 
 export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) => {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LeaderboardFormValues>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<LeaderboardFormValues>({
     resolver: zodResolver(leaderboardSchema),
+    defaultValues: {
+      playerName: '',
+      email: '',
+    },
   });
   const queryClient = useQueryClient();
   const { playSound } = useSound();
 
-  const onSubmit = async (values: LeaderboardFormValues) => {
-    const { error } = await supabase.from('match_leaderboard').insert({
-      player_name: values.playerName,
-      email: values.email || null,
-      total_score: totalScore,
-    });
+  const processSubmission = async (values: LeaderboardFormValues) => {
+    playSound('buttonClick');
+    
+    try {
+      const { error } = await supabase.from('match_leaderboard').insert({
+        player_name: values.playerName,
+        email: values.email || null,
+        total_score: totalScore,
+      });
 
-    if (error) {
-      toast.error('Failed to submit score. Please try again.');
-      console.error('Leaderboard submission error:', error);
-    } else {
+      if (error) {
+        throw error;
+      }
+
       toast.success('Your score has been added to the leaderboard!');
       await queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+      reset();
       onClose();
+
+    } catch (error) {
+      toast.error('Failed to submit score. Please try again.');
+      console.error('Leaderboard submission error:', error);
     }
   };
-
-  const handleFormSubmit = handleSubmit(async (values) => {
-    playSound('buttonClick');
-    await onSubmit(values);
-  });
 
   const handleClose = () => {
     playSound('buttonClick');
@@ -77,7 +84,7 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
             You actually did it, partner! Your score of <strong>{totalScore}</strong> has earned you a spot among the legends. Go on, carve your name into the history books.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <form onSubmit={handleFormSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(processSubmission)} className="space-y-4">
           <div>
             <Label htmlFor="playerName" className="text-amber-900/80">Your Legend Name</Label>
             <Input id="playerName" {...register('playerName')} className="border-amber-700/50 bg-white/50 focus:border-amber-700 focus:ring-amber-700" />
