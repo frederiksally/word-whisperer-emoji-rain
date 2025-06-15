@@ -1,11 +1,11 @@
 
 import React from 'react';
-import Lottie, { LottieComponentProps } from 'lottie-react';
+import Lottie from 'lottie-react';
 
 // We create a wrapper that uses the `path` prop. To ensure type safety with
-// lottie-react's complex union types, we explicitly Omit both `animationData`
-// and `path` from the props we pass through. Our component will then supply the `path`.
-interface LottiePlayerProps extends Omit<LottieComponentProps, 'animationData' | 'path'> {
+// lottie-react's complex union types, we use React.ComponentProps to correctly
+// infer the underlying props and then Omit the ones we'll handle (`animationData` and `path`).
+interface LottiePlayerProps extends Omit<React.ComponentProps<typeof Lottie>, 'animationData' | 'path'> {
   animationDataPath: string;
 }
 
