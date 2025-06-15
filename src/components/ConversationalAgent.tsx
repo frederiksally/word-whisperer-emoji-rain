@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -195,14 +194,7 @@ export const ConversationalAgent = () => {
                 attemptsText={attemptsText}
                 isLowOnGuesses={isLowOnGuesses}
             />
-            <header className="flex-shrink-0 py-2 px-8 border-b border-white/20 flex justify-between items-center bg-black/20 backdrop-blur-sm">
-                <div>
-                    <h1 className="text-xl font-bold">Word Guessing Game</h1>
-                    <p className="text-sm text-white/70">Round {states.roundNumber} of {MAX_ROUNDS}</p>
-                </div>
-                <div className="text-sm font-mono p-2 bg-black/30 text-white/80 rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
-            </header>
-            <main className="flex-grow overflow-hidden">
+            <main className="flex-grow overflow-hidden relative">
                  {!isConnected ? (
                     <div className="text-center h-full flex flex-col items-center justify-center">
                         <p className="text-2xl font-bold">Connecting to agent...</p>

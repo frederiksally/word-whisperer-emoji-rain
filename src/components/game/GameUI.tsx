@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { MAX_GUESSES_PER_ROUND } from '@/hooks/useGameLogic';
 import { useSound } from '@/contexts/SoundContext';
 import { GuessedWords } from './GuessedWords';
+import { WordDisplay } from './WordDisplay';
 
 export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation }: any) => {
     const { states } = gameLogic;
@@ -14,33 +14,36 @@ export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation }
     } = states;
 
     return (
-        <div className="w-full h-full grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-1 h-full">
+        <div className="w-full h-full flex flex-col md:flex-row relative">
+            {/* Guessed words list. On desktop, it's an absolute sidebar. On mobile, it's a block at the top. */}
+            <div className="w-full h-1/3 md:absolute md:left-0 md:top-0 md:w-1/3 md:h-full">
                 <GuessedWords guessedWords={guessedWords} wordToGuess={wordToGuess} />
             </div>
 
-            <div className="md:col-span-2 w-full flex flex-col items-center justify-center gap-4 p-4">
-                <div className="text-center flex-grow flex flex-col justify-center">
-                    <p className="text-lg">I'm thinking of a word...</p>
-                    {currentWord?.category && <p className="text-sm text-white/70">Hint: The category is "{currentWord.category}"</p>}
-                    <p className="text-4xl font-bold tracking-widest p-4">
-                        {wordToGuess ? (gameStatus !== 'playing' ? wordToGuess : wordToGuess.split('').map(() => '_').join('')) : '...'}
-                    </p>
-                    {gameStatus === 'won' && <p className="text-green-500 font-bold text-lg">You won this round! The word was "{wordToGuess}"!</p>}
-                    {gameStatus === 'lost' && <p className="text-red-500 font-bold text-lg">Round over! The word was "{wordToGuess}"!</p>}
-                    {finalMessage && <p className="text-blue-500 font-bold text-lg">{finalMessage}</p>}
-                </div>
-
-                <div className="w-full p-4 border rounded-lg bg-black/30 border-white/20">
-                    <h3 className="font-semibold mb-2">What I'm hearing:</h3>
-                    <p className="text-sm text-white/70 italic min-h-[20px]">
-                        {lastUserTranscript || '...'}
-                    </p>
-                </div>
+            {/* Main content area. Takes full page width on desktop to allow for true centering. */}
+            <div className="w-full h-2/3 md:h-full flex flex-col items-center justify-end md:justify-center gap-4 md:gap-8 p-4">
+                 <div className="flex-grow flex items-center justify-center w-full">
+                    <WordDisplay
+                        wordToGuess={wordToGuess}
+                        gameStatus={gameStatus}
+                        category={currentWord?.category}
+                        guessedWords={guessedWords}
+                        finalMessage={finalMessage}
+                    />
+                 </div>
                 
-                <Button onClick={() => { playSound('buttonClick'); handleStopConversation(); }} variant="destructive">
-                    End Game
-                </Button>
+                <div className="w-full max-w-md">
+                    <div className="w-full p-4 border rounded-lg bg-black/30 border-white/20 mb-4">
+                        <h3 className="font-semibold mb-2">What I'm hearing:</h3>
+                        <p className="text-sm text-white/70 italic min-h-[20px]">
+                            {lastUserTranscript || '...'}
+                        </p>
+                    </div>
+                    
+                    <Button onClick={() => { playSound('buttonClick'); handleStopConversation(); }} variant="destructive" className="w-full">
+                        End Game
+                    </Button>
+                </div>
             </div>
         </div>
     );
