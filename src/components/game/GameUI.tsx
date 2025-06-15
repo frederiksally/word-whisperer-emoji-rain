@@ -40,7 +40,7 @@ export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation }
                         </p>
                     </div>
                     
-                    <Button onClick={() => { playSound('buttonClick'); handleStopConversation(); }} variant="destructive" className="w-full">
+                    <Button onClick={() => { playSound('buttonClick'); handleStopConversation(); }} variant="destructive" size="lg" className="w-full font-boxing text-2xl uppercase">
                         End Game
                     </Button>
                 </div>

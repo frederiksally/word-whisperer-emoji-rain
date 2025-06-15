@@ -208,6 +208,7 @@ export const ConversationalAgent = () => {
         </div>
       ) : (
         <div className="w-full h-full flex flex-col">
+            <img src="/graphics/guess-off-logo01.png" alt="Guess Off Logo" className="fixed top-4 left-4 h-12 w-auto z-20" />
             <GameScore 
                 totalScore={totalScore}
                 roundNumber={roundNumber}
