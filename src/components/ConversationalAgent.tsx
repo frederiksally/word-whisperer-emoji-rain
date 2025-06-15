@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -176,15 +177,25 @@ export const ConversationalAgent = () => {
       />
 
       {!states.matchId ? (
-         <div className="flex-grow flex flex-col items-center justify-center gap-6 p-6">
-            <h1 className="text-4xl font-bold font-boxing tracking-wider">Word Guessing Game</h1>
-            <p className="text-white/80 max-w-md text-center">
-              Talk to our AI agent to guess the secret word! Press Start Game and allow microphone access to begin.
+         <div className="flex-grow flex flex-col items-center justify-center gap-6 p-6 relative">
+            <img src="/graphics/guess-off-logo01.png" alt="Guess Off Logo" className="w-2/3 max-w-lg" />
+            <p className="text-white/80 max-w-md text-center font-pilcrow">
+              Welcome to The Great Guess-Off, partner.
+              <br/>
+              Tex is thinkin&apos; of a word — your job is to guess it before he roasts you into next week. Talk fast, think sharp, and don&apos;t let that cowboy outwit ya.
             </p>
             <div className="text-sm font-mono p-2 bg-black/30 text-white/80 rounded">Status: {isConnecting ? 'Connecting...' : status}</div>
-            <Button onClick={() => { playSound('buttonClick'); handleStartConversation(); }} disabled={isConnecting} size="lg">
+            <Button onClick={() => { playSound('buttonClick'); handleStartConversation(); }} disabled={isConnecting} size="lg" className="font-boxing text-2xl animate-pulse">
                 {isConnecting ? 'Starting...' : 'Start Game'}
             </Button>
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full text-center">
+              <h3 className="font-pilcrow text-sm uppercase tracking-widest text-white/70 mb-2">Built With</h3>
+              <div className="flex justify-center items-center gap-8">
+                <img src="/graphics/lovable-logo.svg" alt="Lovable Logo" className="h-4" />
+                <img src="/graphics/gemini-logo.svg" alt="Gemini Logo" className="h-8" />
+                <img src="/graphics/elevenlabs-logo.svg" alt="ElevenLabs Logo" className="h-4" />
+              </div>
+            </div>
         </div>
       ) : (
         <div className="w-full h-full flex flex-col">
