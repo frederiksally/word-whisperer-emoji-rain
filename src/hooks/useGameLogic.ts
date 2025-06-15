@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -25,6 +24,7 @@ export const useGameLogic = () => {
   const [showLeaderboardPrompt, setShowLeaderboardPrompt] = useState(false);
   const [showLeaderboardDisplay, setShowLeaderboardDisplay] = useState(false);
   const [finalMessage, setFinalMessage] = useState('');
+  const [isAwaitingLeaderboard, setIsAwaitingLeaderboard] = useState(false);
 
   const wordToGuess = currentWord?.word.toLowerCase() ?? '';
 
@@ -40,6 +40,7 @@ export const useGameLogic = () => {
     setShowLeaderboardPrompt(false);
     setShowLeaderboardDisplay(false);
     setFinalMessage('');
+    setIsAwaitingLeaderboard(false);
   }, []);
   
   const resetRoundState = () => {
@@ -104,7 +105,7 @@ export const useGameLogic = () => {
     return newWordData;
   }, [resetMatchState, startNewRoundLogic]);
 
-  const endGameAndCheckLeaderboard = useCallback(async (finalScore: number) => {
+  const displayLeaderboard = useCallback(async (finalScore: number) => {
     const { data, error } = await supabase
       .from('match_leaderboard')
       .select('total_score')
@@ -126,6 +127,11 @@ export const useGameLogic = () => {
     }
   }, []);
 
+  // This function is what the AI will call. It just kicks off the frontend sequence.
+  const endGameAndCheckLeaderboard = useCallback(async (finalScore: number) => {
+    setIsAwaitingLeaderboard(true);
+  }, []);
+
   return {
     states: {
       currentWord,
@@ -140,6 +146,7 @@ export const useGameLogic = () => {
       showLeaderboardDisplay,
       finalMessage,
       wordToGuess,
+      isAwaitingLeaderboard,
     },
     setters: {
       setCurrentWord,
@@ -153,6 +160,7 @@ export const useGameLogic = () => {
       setShowLeaderboardPrompt,
       setShowLeaderboardDisplay,
       setFinalMessage,
+      setIsAwaitingLeaderboard,
     },
     actions: {
       prepareNewMatch,
@@ -162,6 +170,7 @@ export const useGameLogic = () => {
       startNewRoundLogic,
       endGameAndCheckLeaderboard,
       startNewMatch,
+      displayLeaderboard,
     },
   };
 };

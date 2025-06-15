@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,12 +31,13 @@ export const ConversationalAgent = () => {
     },
   });
 
-  const { guessedWords, wordToGuess, gameStatus, roundNumber, showLeaderboardDisplay, matchId, currentWord, totalScore } = states;
+  const { guessedWords, wordToGuess, gameStatus, roundNumber, showLeaderboardDisplay, matchId, currentWord, totalScore, isAwaitingLeaderboard } = states;
   const prevGuessedWords = usePrevious(guessedWords) ?? [];
   const prevGameStatus = usePrevious(gameStatus);
   const prevShowLeaderboardDisplay = usePrevious(showLeaderboardDisplay);
   const prevMatchId = usePrevious(matchId);
   const prevCurrentWord = usePrevious(currentWord);
+  const prevIsAwaitingLeaderboard = usePrevious(isAwaitingLeaderboard);
 
   const attemptsText = gameStatus === 'playing'
     ? `${guessedWords.length} / ${MAX_GUESSES_PER_ROUND}`
@@ -69,23 +69,20 @@ export const ConversationalAgent = () => {
     }
   }, [guessedWords, prevGuessedWords, wordToGuess, playSound, matchId, showNotification]);
 
-  // Sound and Toast on round end
+  // Sound and Toast on round end (for intermediate rounds)
   useEffect(() => {
-    if (prevGameStatus === 'playing' && gameStatus !== 'playing') {
+    // This effect now only handles non-final rounds. The final round is handled
+    // by the isAwaitingLeaderboard effect.
+    if (prevGameStatus === 'playing' && gameStatus !== 'playing' && !isAwaitingLeaderboard) {
       if (gameStatus === 'won') {
         playSound('roundWin');
-        if (roundNumber === MAX_ROUNDS) {
-          showNotification({ message: 'Congratulations, you won the whole game!', type: 'success', duration: 5000 });
-          setShowGameWinOverlay(true);
-        } else {
-          showNotification({ message: `You won round ${roundNumber}!`, type: 'success' });
-        }
+        showNotification({ message: `You won round ${roundNumber}!`, type: 'success' });
       } else if (gameStatus === 'lost') {
         playSound('roundLose');
         showNotification({ message: `Round over! The word was "${wordToGuess}".`, type: 'info' });
       }
     }
-  }, [gameStatus, prevGameStatus, roundNumber, playSound, showNotification, wordToGuess]);
+  }, [gameStatus, prevGameStatus, roundNumber, playSound, showNotification, wordToGuess, isAwaitingLeaderboard]);
 
   // Handle music changes
   useEffect(() => {
@@ -99,6 +96,28 @@ export const ConversationalAgent = () => {
       playMusic('leaderboardMusic');
     }
   }, [matchId, prevMatchId, showLeaderboardDisplay, prevShowLeaderboardDisplay, playSound, playMusic, stopMusic]);
+
+  // NEW: This effect orchestrates the entire end-game cinematic sequence.
+  useEffect(() => {
+    if (isAwaitingLeaderboard && !prevIsAwaitingLeaderboard) {
+      // The AI has signaled the game is over.
+      if (gameStatus === 'won') {
+        // Full game win scenario
+        showNotification({ message: 'Congratulations, you won the whole game!', type: 'success', duration: 5000 });
+        
+        // Wait for the final word's reveal animation to have its moment
+        setTimeout(() => {
+          setShowGameWinOverlay(true);
+        }, 2500);
+      } else {
+        // Game loss scenario on the final round
+        // Wait a bit before showing the leaderboard
+        setTimeout(() => {
+          actions.displayLeaderboard(totalScore);
+        }, 2000);
+      }
+    }
+  }, [isAwaitingLeaderboard, prevIsAwaitingLeaderboard, gameStatus, actions, totalScore, showNotification]);
 
   const handleStartConversation = async () => {
     setIsConnecting(true);
@@ -166,7 +185,11 @@ export const ConversationalAgent = () => {
   
   return (
     <div className="w-full h-screen flex flex-col text-white">
-      {showGameWinOverlay && <GameWinOverlay onAnimationComplete={() => setShowGameWinOverlay(false)} />}
+      {showGameWinOverlay && <GameWinOverlay onAnimationComplete={() => {
+        setShowGameWinOverlay(false);
+        // This is the final step: show the leaderboard prompt/display
+        actions.displayLeaderboard(totalScore);
+      }} />}
       <BackgroundManager 
         roundNumber={roundNumber}
         matchId={matchId}
