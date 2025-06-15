@@ -13,7 +13,6 @@ import { useGameNotification } from '@/contexts/GameNotificationContext';
 import { GameScore } from './game/GameScore';
 import { BackgroundManager } from './game/BackgroundManager';
 import GameWinOverlay from './game/GameWinOverlay';
-import { DevTools } from './DevTools';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
@@ -240,14 +239,6 @@ export const ConversationalAgent = () => {
   
   return (
     <div className="w-full h-screen flex flex-col text-white">
-      {/* DevTools for testing end-game flows, hidden on leaderboard */}
-      {!states.showLeaderboardDisplay && (
-        <DevTools
-          onTestWin={handleTestWin}
-          onTestLeaderboardPrompt={handleTestLeaderboardPrompt}
-          onTestLeaderboard={handleTestLeaderboard}
-        />
-      )}
       {showGameWinOverlay && <GameWinOverlay onAnimationComplete={() => {
         setShowGameWinOverlay(false);
         // This is the final step: show the leaderboard prompt/display
