@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,17 +47,15 @@ export const ConversationalAgent = () => {
     : `${guessedWords.length}`;
   
   const isLowOnGuesses = gameStatus === 'playing' &&
-    (MAX_GUESSES_PER_ROUND - guessedWords.length) <= 2 &&
     guessedWords.length > 0 &&
     guessedWords.length < MAX_GUESSES_PER_ROUND;
 
   // Toast on new theme
   useEffect(() => {
     if (currentWord && currentWord.id !== prevCurrentWord?.id) {
-      playSound('roundIntroduction');
       showNotification({ type: 'round-start', payload: { roundNumber } });
     }
-  }, [currentWord, prevCurrentWord, roundNumber, showNotification, playSound]);
+  }, [currentWord, prevCurrentWord, roundNumber, showNotification]);
 
   // Sound on new guess
   useEffect(() => {
