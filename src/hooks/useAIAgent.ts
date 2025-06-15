@@ -55,7 +55,8 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
       };
 
       if (normalizedWord === wordToGuess) {
-        const roundScore = Math.max(0, 100 - guessedWords.length * 10);
+        // The score is 100 for the first guess, 90 for the second, and so on.
+        const roundScore = Math.max(0, 110 - newGuessedWords.length * 10);
         const newTotalScore = totalScore + roundScore;
         setters.setScore(roundScore);
         setters.setTotalScore(newTotalScore);

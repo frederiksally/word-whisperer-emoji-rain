@@ -1,15 +1,16 @@
-
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { MAX_ROUNDS } from '@/hooks/useGameLogic';
+import { cn } from '@/lib/utils';
 
 interface GameScoreProps {
   totalScore: number;
   roundNumber: number;
   attemptsText: string;
+  isLowOnGuesses?: boolean;
 }
 
-export const GameScore = ({ totalScore, roundNumber, attemptsText }: GameScoreProps) => {
+export const GameScore = ({ totalScore, roundNumber, attemptsText, isLowOnGuesses = false }: GameScoreProps) => {
   const scoreRef = useRef<HTMLParagraphElement>(null);
   const scoreData = useRef({ value: totalScore });
 
@@ -47,7 +48,13 @@ export const GameScore = ({ totalScore, roundNumber, attemptsText }: GameScorePr
             </div>
             <div className="text-center px-8">
                 <p className="text-sm uppercase tracking-wider text-white/80">Attempts</p>
-                <p className="text-5xl font-bold">{attemptsText}</p>
+                <p className={cn(
+                    "text-5xl font-bold transition-colors duration-300",
+                    isLowOnGuesses && "text-yellow-400 animate-pulse"
+                  )}
+                >
+                    {attemptsText}
+                </p>
             </div>
         </div>
     </div>

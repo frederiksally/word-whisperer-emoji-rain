@@ -38,6 +38,11 @@ export const ConversationalAgent = () => {
   const attemptsText = gameStatus === 'playing'
     ? `${guessedWords.length} / ${MAX_GUESSES_PER_ROUND}`
     : `${guessedWords.length}`;
+  
+  const isLowOnGuesses = gameStatus === 'playing' &&
+    (MAX_GUESSES_PER_ROUND - guessedWords.length) <= 2 &&
+    guessedWords.length > 0 &&
+    guessedWords.length < MAX_GUESSES_PER_ROUND;
 
   // Toast on new category
   useEffect(() => {
@@ -172,6 +177,7 @@ export const ConversationalAgent = () => {
                 totalScore={totalScore}
                 roundNumber={roundNumber}
                 attemptsText={attemptsText}
+                isLowOnGuesses={isLowOnGuesses}
             />
             <header className="flex-shrink-0 py-2 px-8 border-b flex justify-between items-center">
                 <div>
