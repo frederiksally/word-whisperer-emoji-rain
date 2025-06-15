@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useSound } from '@/contexts/SoundContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 import {
   AlertDialog,
@@ -37,6 +38,7 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LeaderboardFormValues>({
     resolver: zodResolver(leaderboardSchema),
   });
+  const queryClient = useQueryClient();
   const { playSound } = useSound();
 
   const onSubmit = async (values: LeaderboardFormValues) => {
@@ -51,6 +53,7 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
       console.error('Leaderboard submission error:', error);
     } else {
       toast.success('Your score has been added to the leaderboard!');
+      await queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
       onClose();
     }
   };
