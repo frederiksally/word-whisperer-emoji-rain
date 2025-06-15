@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -238,7 +239,7 @@ export const ConversationalAgent = () => {
         </div>
       ) : (
         <div className="w-full h-full flex flex-col">
-            <img src="/graphics/guess-off-logo01.png" alt="Guess Off Logo" className="fixed top-4 left-4 h-12 w-auto z-20" />
+            <img src="/graphics/guess-off-logo01.png" alt="Guess Off Logo" className="fixed top-4 left-4 h-16 w-auto z-20" />
             <GameScore 
                 totalScore={totalScore}
                 roundNumber={roundNumber}
