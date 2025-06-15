@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Trophy } from 'lucide-react';
 import { gsap } from 'gsap';
 import { useSound } from '@/contexts/SoundContext';
@@ -10,6 +9,13 @@ interface GameWinOverlayProps {
 
 const GameWinOverlay: React.FC<GameWinOverlayProps> = ({ onAnimationComplete }) => {
     const { playSound } = useSound();
+    const onAnimationCompleteRef = useRef(onAnimationComplete);
+
+    // Keep the ref updated with the latest callback to prevent stale closures,
+    // without making the main effect dependent on the callback's identity.
+    useEffect(() => {
+        onAnimationCompleteRef.current = onAnimationComplete;
+    }, [onAnimationComplete]);
 
     useEffect(() => {
         playSound('gameWin');
@@ -39,14 +45,25 @@ const GameWinOverlay: React.FC<GameWinOverlayProps> = ({ onAnimationComplete }) 
         });
 
         // Auto-close after some time
-        gsap.to('.game-win-overlay', {
+        const delayedCall = gsap.to('.game-win-overlay', {
             delay: 4.5,
             opacity: 0,
             duration: 0.5,
-            onComplete: onAnimationComplete
+            onComplete: () => {
+                // Use the ref to call the latest version of the callback
+                if (onAnimationCompleteRef.current) {
+                    onAnimationCompleteRef.current();
+                }
+            }
         });
+        
+        // Cleanup animations on component unmount
+        return () => {
+            tl.kill();
+            delayedCall.kill();
+        }
 
-    }, [playSound, onAnimationComplete]);
+    }, [playSound]);
 
     return (
         <div className="game-win-overlay fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-50">
