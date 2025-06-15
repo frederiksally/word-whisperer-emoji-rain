@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useSound } from '@/contexts/SoundContext';
 import { useQueryClient } from '@tanstack/react-query';
 
 import {
@@ -41,11 +40,8 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
     },
   });
   const queryClient = useQueryClient();
-  const { playSound } = useSound();
 
   const processSubmission = async (values: LeaderboardFormValues) => {
-    playSound('buttonClick');
-    
     const submissionData = {
       player_name: values.playerName,
       email: values.email || null,
@@ -79,7 +75,6 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
   };
 
   const handleClose = () => {
-    playSound('buttonClick');
     onClose();
   }
 

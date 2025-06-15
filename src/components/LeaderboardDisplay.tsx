@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from './ui/button';
-import { useSound } from '@/contexts/SoundContext';
 
 type LeaderboardEntry = {
   id: string;
@@ -36,7 +34,6 @@ export const LeaderboardDisplay = ({ onPlayAgain }: { onPlayAgain: () => void })
     queryKey: ['leaderboard'],
     queryFn: fetchLeaderboard,
   });
-  const { playSound } = useSound();
 
   return (
     <Card className="w-full max-w-lg mx-auto bg-stone-900/80 border-amber-500/50 text-white font-pilcrow backdrop-blur-sm">
@@ -73,7 +70,7 @@ export const LeaderboardDisplay = ({ onPlayAgain }: { onPlayAgain: () => void })
             </TableBody>
           </Table>
         )}
-        <Button onClick={() => { playSound('buttonClick'); onPlayAgain(); }} size="lg" className="mt-4 font-boxing text-2xl uppercase bg-amber-500 hover:bg-amber-600 text-stone-900 animate-button-pulse">Go Again</Button>
+        <Button onClick={onPlayAgain} size="lg" className="mt-4 font-boxing text-2xl uppercase bg-amber-500 hover:bg-amber-600 text-stone-900 animate-button-pulse">Go Again</Button>
       </CardContent>
     </Card>
   );

@@ -1,13 +1,12 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useSound } from '@/contexts/SoundContext';
 import { GuessedWords } from './GuessedWords';
 import { WordDisplay } from './WordDisplay';
 import { TexAvatar } from './TexAvatar';
 
 export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation, isConnected }: { gameLogic: any, lastUserTranscript: string, handleStopConversation: () => void, isConnected: boolean }) => {
     const { states } = gameLogic;
-    const { playSound } = useSound();
     const {
         guessedWords, gameStatus,
         wordToGuess, currentWord, finalMessage,
@@ -45,7 +44,7 @@ export const GameUI = ({ gameLogic, lastUserTranscript, handleStopConversation, 
                         </p>
                     </div>
                     
-                    <Button onClick={() => { playSound('buttonClick'); handleStopConversation(); }} variant="destructive" size="lg" className="w-full font-boxing text-2xl uppercase">
+                    <Button onClick={handleStopConversation} variant="destructive" size="lg" className="w-full font-boxing text-2xl uppercase">
                         End Game
                     </Button>
                 </div>
