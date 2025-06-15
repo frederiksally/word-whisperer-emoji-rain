@@ -48,16 +48,26 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
   const processSubmission = async (values: LeaderboardFormValues) => {
     playSound('buttonClick');
     
+    const submissionData = {
+      player_name: values.playerName,
+      email: values.email || null,
+      total_score: totalScore,
+    };
+    
+    console.log('Attempting to submit to leaderboard with data:', submissionData);
+
     try {
-      const { error } = await supabase.from('match_leaderboard').insert({
-        player_name: values.playerName,
-        email: values.email || null,
-        total_score: totalScore,
-      });
+      const { data, error } = await supabase
+        .from('match_leaderboard')
+        .insert(submissionData)
+        .select();
 
       if (error) {
+        console.error('Supabase leaderboard insert error:', error);
         throw error;
       }
+      
+      console.log('Successfully submitted score. Response:', data);
 
       toast.success('Your score has been added to the leaderboard!');
       await queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
@@ -66,7 +76,7 @@ export const LeaderboardPromptDialog = ({ isOpen, totalScore, onClose }: Props) 
 
     } catch (error) {
       toast.error('Failed to submit score. Please try again.');
-      console.error('Leaderboard submission error:', error);
+      console.error('Caught error during leaderboard submission:', error);
     }
   };
 
