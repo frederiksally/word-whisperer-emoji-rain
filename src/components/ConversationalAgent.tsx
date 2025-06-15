@@ -212,7 +212,7 @@ export const ConversationalAgent = () => {
             <main className="flex-grow overflow-hidden relative">
                  {!isConnected ? (
                     <div className="text-center h-full flex flex-col items-center justify-center">
-                        <p className="text-2xl font-bold">Connecting to agent...</p>
+                        <p className="text-2xl font-bold">Starting game..</p>
                     </div>
                 ) : (
                   <GameUI 
