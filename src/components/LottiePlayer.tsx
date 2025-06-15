@@ -7,15 +7,8 @@ interface LottiePlayerProps extends Omit<LottieComponentProps, 'animationData'> 
 }
 
 export const LottiePlayer: React.FC<LottiePlayerProps> = ({ animationDataPath, ...props }) => {
-    const [animationData, setAnimationData] = React.useState(null);
-
-    React.useEffect(() => {
-        fetch(animationDataPath)
-            .then(res => res.json())
-            .then(data => setAnimationData(data));
-    }, [animationDataPath]);
-    
-    if (!animationData) return null;
-
-    return <Lottie animationData={animationData} {...props} />;
+    // The `lottie-react` component can handle fetching from a path directly.
+    // This avoids issues with trying to parse compressed .lottie files as JSON,
+    // which was causing the error.
+    return <Lottie path={animationDataPath} {...props} />;
 };
