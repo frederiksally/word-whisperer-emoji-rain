@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,7 +24,7 @@ export const ConversationalAgent = () => {
   
   const gameLogic = useGameLogic();
   const { states, actions, setters } = gameLogic;
-  const { startSession, endSession, status, clientTools } = useAIAgent(gameLogic, {
+  const { startSession, endSession, status, clientTools, isSpeaking } = useAIAgent(gameLogic, {
     onMessage: (message) => {
       if (message.source === 'user' && message.message) {
         setLastUserTranscript(message.message);
@@ -39,7 +38,7 @@ export const ConversationalAgent = () => {
   const prevShowLeaderboardDisplay = usePrevious(showLeaderboardDisplay);
   const prevMatchId = usePrevious(matchId);
   const prevCurrentWord = usePrevious(currentWord);
-  const prevIsAwaitingLeaderboard = usePrevious(isAwaitingLeaderboard);
+  const prevIsSpeaking = usePrevious(isSpeaking);
 
   const attemptsText = gameStatus === 'playing'
     ? `${guessedWords.length} / ${MAX_GUESSES_PER_ROUND}`
@@ -102,22 +101,19 @@ export const ConversationalAgent = () => {
   }, [matchId, prevMatchId, showLeaderboardDisplay, prevShowLeaderboardDisplay, playSound, playMusic, stopMusic]);
 
   // NEW: This effect orchestrates the entire end-game cinematic sequence.
+  // It now waits for the agent to finish its final speech before starting.
   useEffect(() => {
-    if (isAwaitingLeaderboard && !prevIsAwaitingLeaderboard) {
-      // The AI has signaled the game is over.
+    // Condition: Game has ended, and AI just finished speaking.
+    if (isAwaitingLeaderboard && prevIsSpeaking && !isSpeaking) {
       if (gameStatus === 'won') {
         // --- Grand Win Sequence ---
-        // 1. Play the final round win sound immediately.
         playSound('roundWin');
         showNotification({ message: `You won the final round!`, type: 'success', duration: 2000 });
         
-        // 2. Pause briefly to let the round win sink in, then fade out round music.
         setTimeout(() => {
             stopMusic();
         }, 1000);
 
-        // 3. After another pause, show the main "YOU WON" overlay.
-        // This overlay handles its own 'gameWin' sound and animations.
         setTimeout(() => {
           setShowGameWinOverlay(true);
         }, 2500);
@@ -126,13 +122,12 @@ export const ConversationalAgent = () => {
         // --- Final Round Loss Sequence ---
         playSound('roundLose');
         showNotification({ message: `Round over! The word was "${wordToGuess}".`, type: 'info' });
-        // Wait a bit before showing the leaderboard to let the loss register.
         setTimeout(() => {
           actions.displayLeaderboard(totalScore);
         }, 2000);
       }
     }
-  }, [isAwaitingLeaderboard, prevIsAwaitingLeaderboard, gameStatus, actions, totalScore, showNotification, playSound, stopMusic, wordToGuess]);
+  }, [isAwaitingLeaderboard, isSpeaking, prevIsSpeaking, gameStatus, actions, totalScore, showNotification, playSound, stopMusic, wordToGuess]);
 
   const handleStartConversation = async () => {
     setIsConnecting(true);

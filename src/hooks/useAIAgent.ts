@@ -69,7 +69,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
             return `The user's guess "${normalizedWord}" was CORRECT. They won the round and scored ${roundScore} points. Their total score is now ${newTotalScore}. Now, ask them if they are ready for the next round. If they give an affirmative answer, you MUST call the startNextRound tool.`;
         } else {
             actions.endGameAndCheckLeaderboard(newTotalScore);
-            return `The user's guess "${normalizedWord}" was CORRECT. They won the final round, scoring ${roundScore} points. This was the last round! Tell them the game is over and their final total score is ${newTotalScore}. The application will now show them the leaderboard results.`;
+            return `The user's guess "${normalizedWord}" was CORRECT. They won the final round, scoring ${roundScore} points. This was the last round! Their final total score is ${newTotalScore}. Thanks for playin', and have yourself a mighty fine day! [system: end_call]`;
         }
       } else {
         if (newGuessedWords.length >= MAX_GUESSES_PER_ROUND) {
@@ -80,7 +80,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
                 return `The user ran out of guesses. The round is over. The word was "${wordToGuess}". Tell them not to worry, and ask if they are ready for the next round. If they give an affirmative answer, you MUST call the startNextRound tool.`;
             } else {
                 actions.endGameAndCheckLeaderboard(totalScore);
-                return `The user ran out of guesses on the final round. The game is over. The word was "${wordToGuess}". Tell them their final score is ${totalScore}, and the application will now show them the leaderboard results.`;
+                return `The user ran out of guesses on the final round. The game is over. The word was "${wordToGuess}". Their final score is ${totalScore}. Thanks for playin', and have yourself a mighty fine day! [system: end_call]`;
             }
         } else {
             toast.error(`"${normalizedWord}" is not the word. Try again!`);
@@ -90,11 +90,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
       }
     },
     getGameStatus: () => {
-      const { wordToGuess, gameStatus, guessedWords, currentWord, roundNumber, totalScore, matchId, showLeaderboardDisplay } = gameStateRef.current;
-
-      if (showLeaderboardDisplay) {
-        return `The user is viewing the leaderboard. Say "Thanks for playin', and have yourself a mighty fine day!" and then hang up. [system: end_call]`;
-      }
+      const { wordToGuess, gameStatus, guessedWords, currentWord, roundNumber, totalScore, matchId } = gameStateRef.current;
 
       if (!matchId) {
         return "The game hasn't started yet. The user needs to say 'start game'.";
@@ -134,7 +130,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
       }
       if (roundNumber >= MAX_ROUNDS) {
           actions.endGameAndCheckLeaderboard(totalScore);
-          return `The game is already over. You have completed all ${MAX_ROUNDS} rounds. Tell the user their final score is ${totalScore} and the application will now show them the leaderboard results.`;
+          return `The game is already over. You have completed all ${MAX_ROUNDS} rounds. Their final score is ${totalScore}. Thanks for playin', and have yourself a mighty fine day! [system: end_call]`;
       }
 
       const nextRound = roundNumber + 1;
@@ -147,7 +143,7 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
     }
   }), [gameLogic]);
 
-  const { startSession, endSession, status } = useConversation({
+  const { startSession, endSession, status, isSpeaking } = useConversation({
     ...options,
     clientTools,
   });
@@ -157,5 +153,6 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
     endSession,
     status,
     clientTools,
+    isSpeaking,
   };
 };
