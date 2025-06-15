@@ -5,8 +5,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { SoundProvider } from "./contexts/SoundContext";
-import { GameToastProvider } from "./contexts/GameToastContext";
-import { GameToaster } from "./components/game/GameToaster";
+import { GameNotificationProvider } from "./contexts/GameNotificationContext";
+import { GameNotificationManager } from "./components/game/GameNotificationManager";
 
 const queryClient = new QueryClient();
 
@@ -14,8 +14,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <SoundProvider>
-        <GameToastProvider>
-          <GameToaster />
+        <GameNotificationProvider>
+          <GameNotificationManager />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -23,7 +23,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </GameToastProvider>
+        </GameNotificationProvider>
       </SoundProvider>
     </TooltipProvider>
   </QueryClientProvider>

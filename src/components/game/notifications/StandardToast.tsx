@@ -1,13 +1,13 @@
 
 import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
-import { GameToast as GameToastProps } from '@/contexts/GameToastContext';
+import { GameNotification as StandardToastProps } from '@/contexts/GameNotificationContext';
 
-interface Props extends GameToastProps {
+interface Props extends StandardToastProps {
   onDismiss: (id: string) => void;
 }
 
-export const GameToast: React.FC<Props> = ({ id, message, visible, onDismiss }) => {
+export const StandardToast: React.FC<Props> = ({ id, message, visible, onDismiss }) => {
   const toastRef = useRef<HTMLLIElement>(null);
 
   useEffect(() => {

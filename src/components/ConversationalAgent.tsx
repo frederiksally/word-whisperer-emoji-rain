@@ -9,14 +9,14 @@ import { useAIAgent } from '@/hooks/useAIAgent';
 import { GameUI } from './game/GameUI';
 import { useSound } from '@/contexts/SoundContext';
 import { usePrevious } from '@/hooks/usePrevious';
-import { useGameToast } from '@/contexts/GameToastContext';
+import { useGameNotification } from '@/contexts/GameNotificationContext';
 import { GameScore } from './game/GameScore';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [lastUserTranscript, setLastUserTranscript] = useState('');
   const { playSound, playMusic, stopMusic } = useSound();
-  const { showToast } = useGameToast();
+  const { showNotification } = useGameNotification();
   
   const gameLogic = useGameLogic();
   const { states, actions, setters } = gameLogic;
@@ -42,9 +42,9 @@ export const ConversationalAgent = () => {
   // Toast on new category
   useEffect(() => {
     if (currentWord && currentWord.id !== prevCurrentWord?.id) {
-      showToast(`Round ${roundNumber}: ${currentWord.category} (${wordToGuess.length} letters)`, { type: 'info', duration: 4000 });
+      showNotification({ type: 'round-start', payload: { roundNumber } });
     }
-  }, [currentWord, prevCurrentWord, roundNumber, wordToGuess.length, showToast]);
+  }, [currentWord, prevCurrentWord, roundNumber, showNotification]);
 
   // Sound on new guess
   useEffect(() => {
@@ -52,13 +52,13 @@ export const ConversationalAgent = () => {
       const lastGuess = guessedWords[guessedWords.length - 1];
       if (lastGuess === wordToGuess) {
         playSound('guessCorrect');
-        showToast(`You guessed it!`, { type: 'success', duration: 2000 });
+        showNotification({ message: `You guessed it!`, type: 'success', duration: 2000 });
       } else {
         playSound('guessIncorrect');
         // User requested to remove feedback for incorrect guess
       }
     }
-  }, [guessedWords, prevGuessedWords, wordToGuess, playSound, matchId, showToast]);
+  }, [guessedWords, prevGuessedWords, wordToGuess, playSound, matchId, showNotification]);
 
   // Sound and Toast on round end
   useEffect(() => {
@@ -67,16 +67,16 @@ export const ConversationalAgent = () => {
         playSound('roundWin');
         if (roundNumber === MAX_ROUNDS) {
           playSound('gameWin');
-          showToast('Congratulations, you won the whole game!', { type: 'success', duration: 5000 });
+          showNotification({ message: 'Congratulations, you won the whole game!', type: 'success', duration: 5000 });
         } else {
-          showToast(`You won round ${roundNumber}!`, { type: 'success' });
+          showNotification({ message: `You won round ${roundNumber}!`, type: 'success' });
         }
       } else if (gameStatus === 'lost') {
         playSound('roundLose');
-        showToast(`Round over! The word was "${wordToGuess}".`, { type: 'info' });
+        showNotification({ message: `Round over! The word was "${wordToGuess}".`, type: 'info' });
       }
     }
-  }, [gameStatus, prevGameStatus, roundNumber, playSound, showToast, wordToGuess]);
+  }, [gameStatus, prevGameStatus, roundNumber, playSound, showNotification, wordToGuess]);
 
   // Handle music changes
   useEffect(() => {
@@ -96,7 +96,7 @@ export const ConversationalAgent = () => {
     
     const newWordData = await actions.startNewMatch();
     if (!newWordData) {
-      showToast("Could not start game. Please try again.", { type: 'error' });
+      showNotification({ message: "Could not start game. Please try again.", type: 'error' });
       setIsConnecting(false);
       return;
     }
@@ -111,7 +111,7 @@ export const ConversationalAgent = () => {
 
     } catch (error) {
       console.error('Failed to start conversation:', error);
-      showToast(`Error starting conversation: ${error instanceof Error ? error.message : String(error)}`, { type: 'error' });
+      showNotification({ message: `Error starting conversation: ${error instanceof Error ? error.message : String(error)}`, type: 'error' });
       actions.resetMatchState();
     } finally {
       setIsConnecting(false);
@@ -139,11 +139,11 @@ export const ConversationalAgent = () => {
     // Only reset the match if the status is fully 'disconnected'
     // This prevents premature resets on temporary connection flickers
     if (status === 'disconnected' && !isConnecting && states.matchId && !states.showLeaderboardPrompt && !states.showLeaderboardDisplay) {
-      showToast("You have been disconnected from the agent.", { type: 'error' });
+      showNotification({ message: "You have been disconnected from the agent.", type: 'error' });
       actions.resetMatchState();
       setLastUserTranscript('');
     }
-  }, [status, isConnecting, actions, states.matchId, states.showLeaderboardPrompt, states.showLeaderboardDisplay, showToast]);
+  }, [status, isConnecting, actions, states.matchId, states.showLeaderboardPrompt, states.showLeaderboardDisplay, showNotification]);
 
   if (states.showLeaderboardDisplay) {
     return <LeaderboardDisplay onPlayAgain={handlePlayAgain} />;
