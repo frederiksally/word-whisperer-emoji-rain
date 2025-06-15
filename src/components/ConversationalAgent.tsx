@@ -283,7 +283,7 @@ export const ConversationalAgent = () => {
                 Tex is thinkin&apos; of a word — your job is to guess it before he roasts you into next week. Talk fast, think sharp, and don&apos;t let that cowboy outwit ya.
               </p>
               <Button 
-                onClick={() => { playSound('buttonClick'); handleStartConversation(); }} 
+                onClick={handleStartConversation}
                 disabled={isConnecting} 
                 size="lg" 
                 className="font-boxing text-2xl uppercase animate-button-pulse bg-amber-500 hover:bg-amber-600 text-stone-900"
