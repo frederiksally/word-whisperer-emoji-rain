@@ -13,10 +13,12 @@ import { usePrevious } from '@/hooks/usePrevious';
 import { useGameNotification } from '@/contexts/GameNotificationContext';
 import { GameScore } from './game/GameScore';
 import { BackgroundManager } from './game/BackgroundManager';
+import GameWinOverlay from './game/GameWinOverlay';
 
 export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [lastUserTranscript, setLastUserTranscript] = useState('');
+  const [showGameWinOverlay, setShowGameWinOverlay] = useState(false);
   const { playSound, playMusic, stopMusic } = useSound();
   const { showNotification } = useGameNotification();
   
@@ -73,8 +75,8 @@ export const ConversationalAgent = () => {
       if (gameStatus === 'won') {
         playSound('roundWin');
         if (roundNumber === MAX_ROUNDS) {
-          playSound('gameWin');
           showNotification({ message: 'Congratulations, you won the whole game!', type: 'success', duration: 5000 });
+          setShowGameWinOverlay(true);
         } else {
           showNotification({ message: `You won round ${roundNumber}!`, type: 'success' });
         }
@@ -100,6 +102,7 @@ export const ConversationalAgent = () => {
 
   const handleStartConversation = async () => {
     setIsConnecting(true);
+    setShowGameWinOverlay(false);
     
     actions.prepareNewMatch();
 
@@ -125,6 +128,7 @@ export const ConversationalAgent = () => {
     actions.resetMatchState();
     setLastUserTranscript('');
     stopMusic();
+    setShowGameWinOverlay(false);
   };
 
   const handlePlayAgain = () => {
@@ -162,6 +166,7 @@ export const ConversationalAgent = () => {
   
   return (
     <div className="w-full h-screen flex flex-col text-white">
+      {showGameWinOverlay && <GameWinOverlay onAnimationComplete={() => setShowGameWinOverlay(false)} />}
       <BackgroundManager 
         roundNumber={roundNumber}
         matchId={matchId}

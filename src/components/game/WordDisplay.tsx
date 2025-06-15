@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { usePrevious } from '@/hooks/usePrevious';
@@ -64,22 +63,68 @@ export const WordDisplay: React.FC<WordDisplayProps> = ({ wordToGuess, gameStatu
     useEffect(() => {
         if (prevGameStatus === 'playing' && (gameStatus === 'won' || gameStatus === 'lost')) {
             const tl = gsap.timeline();
-            letterRefs.current.forEach((el, index) => {
-                if(!el) return;
-                const blank = el.querySelector('.letter-blank');
-                const letter = el.querySelector('.letter-char');
-                tl.to(blank, {
-                    y: 20,
-                    opacity: 0,
-                    duration: 0.3,
-                    ease: 'power2.in'
-                }, index * 0.05);
-                tl.fromTo(letter, 
-                    { y: -20, opacity: 0 },
-                    { y: 0, opacity: 1, duration: 0.4, ease: 'back.out(1.7)' },
-                    '>-0.2'
+            
+            if (gameStatus === 'won') {
+                // WINNING ANIMATION
+                letterRefs.current.forEach((el, index) => {
+                    if(!el) return;
+                    const blank = el.querySelector('.letter-blank');
+                    const letter = el.querySelector('.letter-char') as HTMLElement;
+                    
+                    if (blank && letter) {
+                        tl.to(blank, { y: 20, opacity: 0, duration: 0.3, ease: 'power2.in' }, index * 0.1);
+
+                        tl.fromTo(letter, 
+                            { y: -20, opacity: 0, scale: 0.5, color: '#FFFFFF' },
+                            { 
+                                y: 0, 
+                                opacity: 1, 
+                                scale: 1,
+                                color: '#facc15', // amber-400
+                                duration: 0.5, 
+                                ease: 'back.out(2)',
+                            },
+                            '>-0.2'
+                        );
+
+                        // Add a little pop and glow
+                        tl.fromTo(letter,
+                            { filter: 'drop-shadow(0 0 0px #fde047)' },
+                            { filter: 'drop-shadow(0 0 15px #fde047)', duration: 0.3, yoyo: true, repeat: 1 }, // yellow-300
+                            '<'
+                        );
+                    }
+                });
+                
+                // After all letters are revealed, make them all pulse.
+                const letterChars = letterRefs.current.map(r => r?.querySelector('.letter-char')).filter(Boolean);
+                tl.to(letterChars,
+                    {
+                        filter: 'drop-shadow(0 0 20px #facc15)',
+                        duration: 1.5,
+                        yoyo: true,
+                        repeat: -1,
+                        ease: 'power1.inOut',
+                        stagger: 0.05
+                    },
+                    '>-0.5'
                 );
-            });
+
+            } else { // LOST ANIMATION
+                letterRefs.current.forEach((el, index) => {
+                    if(!el) return;
+                    const blank = el.querySelector('.letter-blank');
+                    const letter = el.querySelector('.letter-char') as HTMLElement;
+                    if (blank && letter) {
+                        tl.to(blank, { y: 20, opacity: 0, duration: 0.3, ease: 'power2.in' }, index * 0.05);
+                        tl.fromTo(letter, 
+                            { y: -20, opacity: 0, color: '#FFFFFF' },
+                            { y: 0, opacity: 1, color: '#ef4444', duration: 0.4, ease: 'back.out(1.7)' }, // red-500
+                            '>-0.2'
+                        );
+                    }
+                });
+            }
         }
     }, [gameStatus, prevGameStatus]);
 
@@ -101,7 +146,6 @@ export const WordDisplay: React.FC<WordDisplayProps> = ({ wordToGuess, gameStatu
                     </span>
                 )) : <p className="text-4xl font-bold tracking-widest p-4">...</p>}
             </div>
-            {gameStatus === 'won' && <p className="text-green-500 font-bold text-lg mt-4 animate-scale-in">You won this round! The word was "{wordToGuess?.toUpperCase()}"!</p>}
             {gameStatus === 'lost' && <p className="text-red-500 font-bold text-lg mt-4 animate-scale-in">Round over! The word was "{wordToGuess?.toUpperCase()}"!</p>}
             {finalMessage && <p className="text-blue-500 font-bold text-lg mt-4 animate-scale-in">{finalMessage}</p>}
         </div>
