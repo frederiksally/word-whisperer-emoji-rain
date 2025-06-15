@@ -97,9 +97,8 @@ export const ConversationalAgent = () => {
     if (showLeaderboardDisplay && !prevShowLeaderboardDisplay) {
       stopMusic();
       playMusic('leaderboardMusic');
-      if (endSession) endSession();
     }
-  }, [matchId, prevMatchId, showLeaderboardDisplay, prevShowLeaderboardDisplay, playSound, playMusic, stopMusic, endSession]);
+  }, [matchId, prevMatchId, showLeaderboardDisplay, prevShowLeaderboardDisplay, playSound, playMusic, stopMusic]);
 
   // NEW: This effect orchestrates the entire end-game cinematic sequence.
   // It now waits for the agent to finish its final speech before starting.
@@ -197,12 +196,12 @@ export const ConversationalAgent = () => {
   useEffect(() => {
     // Only reset the match if the status is fully 'disconnected'
     // This prevents premature resets on temporary connection flickers
-    if (status === 'disconnected' && !isConnecting && states.matchId && !states.showLeaderboardPrompt && !states.showLeaderboardDisplay) {
+    if (status === 'disconnected' && !isConnecting && states.matchId && !states.showLeaderboardPrompt && !states.showLeaderboardDisplay && !states.isAwaitingLeaderboard) {
       showNotification({ message: "You have been disconnected from the agent.", type: 'error' });
       actions.resetMatchState();
       setLastUserTranscript('');
     }
-  }, [status, isConnecting, actions, states.matchId, states.showLeaderboardPrompt, states.showLeaderboardDisplay, showNotification]);
+  }, [status, isConnecting, actions, states.matchId, states.showLeaderboardPrompt, states.showLeaderboardDisplay, states.isAwaitingLeaderboard, showNotification]);
 
   if (states.showLeaderboardDisplay) {
     return (
