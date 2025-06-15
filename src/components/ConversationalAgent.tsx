@@ -85,7 +85,7 @@ export const ConversationalAgent = () => {
     }
   }, [gameStatus, prevGameStatus, roundNumber, playSound, showNotification, wordToGuess, isAwaitingLeaderboard]);
 
-  // Handle music changes and idle disconnect on leaderboard
+  // Handle music changes on new match or leaderboard
   useEffect(() => {
     if (matchId && matchId !== prevMatchId) {
       stopMusic(); // Stop any previous music
@@ -96,21 +96,8 @@ export const ConversationalAgent = () => {
     if (showLeaderboardDisplay && !prevShowLeaderboardDisplay) {
       stopMusic();
       playMusic('leaderboardMusic');
-
-      // Set a timeout to end the session if the user is idle on the leaderboard screen.
-      // This prevents the connection from staying open indefinitely.
-      const timeoutId = setTimeout(() => {
-        if (endSession && status === 'connected') {
-          console.log("Ending session due to leaderboard inactivity.");
-          endSession();
-        }
-      }, 20000); // 20 seconds of inactivity
-
-      return () => {
-        clearTimeout(timeoutId);
-      };
     }
-  }, [matchId, prevMatchId, showLeaderboardDisplay, prevShowLeaderboardDisplay, playSound, playMusic, stopMusic, endSession, status]);
+  }, [matchId, prevMatchId, showLeaderboardDisplay, prevShowLeaderboardDisplay, playSound, playMusic, stopMusic]);
 
   // NEW: This effect orchestrates the entire end-game cinematic sequence.
   // It now waits for the agent to finish its final speech before starting.
