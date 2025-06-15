@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useConversation } from '@11labs/react';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +19,7 @@ export const ConversationalAgent = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [lastUserTranscript, setLastUserTranscript] = useState('');
   const [showGameWinOverlay, setShowGameWinOverlay] = useState(false);
+  const [hasTriggeredEndSequence, setHasTriggeredEndSequence] = useState(false);
   const { playSound, playMusic, stopMusic } = useSound();
   const { showNotification } = useGameNotification();
   
@@ -104,8 +104,10 @@ export const ConversationalAgent = () => {
   // This effect orchestrates the end-game sequence, triggering immediately
   // when the game enters the 'isAwaitingLeaderboard' state for a more responsive feel.
   useEffect(() => {
-    // We only want this to fire once on the transition from false to true.
-    if (!prevIsAwaitingLeaderboard && isAwaitingLeaderboard) {
+    // We add hasTriggeredEndSequence to ensure this only ever runs ONCE per match.
+    if (!hasTriggeredEndSequence && !prevIsAwaitingLeaderboard && isAwaitingLeaderboard) {
+      setHasTriggeredEndSequence(true); // Set the latch immediately.
+
       if (gameStatus === 'won') {
         // --- Grand Win Sequence ---
         playSound('roundWin');
@@ -130,6 +132,7 @@ export const ConversationalAgent = () => {
       }
     }
   }, [
+    hasTriggeredEndSequence,
     isAwaitingLeaderboard, 
     prevIsAwaitingLeaderboard, 
     gameStatus, 
@@ -144,6 +147,7 @@ export const ConversationalAgent = () => {
   const handleStartConversation = async () => {
     setIsConnecting(true);
     setShowGameWinOverlay(false);
+    setHasTriggeredEndSequence(false); // Reset the latch for the new game
     
     actions.prepareNewMatch();
 
@@ -170,15 +174,18 @@ export const ConversationalAgent = () => {
     setLastUserTranscript('');
     stopMusic();
     setShowGameWinOverlay(false);
+    setHasTriggeredEndSequence(false); // Reset the latch
   };
 
   const handlePlayAgain = () => {
     actions.resetMatchState();
     stopMusic();
+    setHasTriggeredEndSequence(false); // Reset the latch
   }
 
   // --- Test Handlers for DevTools ---
   const handleTestWin = () => {
+    setHasTriggeredEndSequence(false); // Reset for testing
     actions.resetMatchState();
     setters.setMatchId('test-match-id');
     setters.setGameStatus('won');
@@ -188,6 +195,7 @@ export const ConversationalAgent = () => {
   };
 
   const handleTestLeaderboardPrompt = () => {
+    setHasTriggeredEndSequence(false); // Reset for testing
     actions.resetMatchState();
     setters.setMatchId('test-match-id');
     setters.setTotalScore(1250); // A score high enough to trigger prompt
@@ -195,6 +203,7 @@ export const ConversationalAgent = () => {
   };
 
   const handleTestLeaderboard = () => {
+    setHasTriggeredEndSequence(false); // Reset for testing
     actions.resetMatchState();
     setters.setMatchId('test-match-id');
     stopMusic();
