@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { usePrevious } from '@/hooks/usePrevious';
@@ -87,22 +86,22 @@ export const WordDisplay: React.FC<WordDisplayProps> = ({ wordToGuess, gameStatu
 
     return (
         <div ref={containerRef} className="w-full flex flex-col items-center justify-center gap-4 p-4 text-center">
-            <p className="text-lg">I'm thinking of a word...</p>
-            {category && <p className="text-sm text-white/70">Hint: The category is "{category}"</p>}
+            <p className="text-lg font-pilcrow">I'm thinking of a word...</p>
+            {category && <p className="text-sm text-white/70 font-pilcrow">Hint: The category is "{category}"</p>}
             <div className="flex justify-center items-center gap-2 md:gap-4 p-4 min-h-[5rem]">
                 {characters.length > 0 ? characters.map((char, index) => (
                     <span
                         key={index}
                         ref={el => letterRefs.current[index] = el}
-                        className="relative text-4xl md:text-6xl font-bold font-boxing tracking-widest text-white w-[1ch] h-[1.2em]"
+                        className="relative text-5xl md:text-7xl font-bold font-boxing tracking-widest text-white w-[1ch] h-[1.2em]"
                     >
                         <span className="letter-blank absolute inset-0 flex items-center justify-center">{gameStatus === 'playing' ? '_' : ''}</span>
-                        <span className="letter-char absolute inset-0 flex items-center justify-center opacity-0">{char}</span>
+                        <span className="letter-char absolute inset-0 flex items-center justify-center opacity-0">{char.toUpperCase()}</span>
                     </span>
                 )) : <p className="text-4xl font-bold tracking-widest p-4">...</p>}
             </div>
-            {gameStatus === 'won' && <p className="text-green-500 font-bold text-lg mt-4 animate-scale-in">You won this round! The word was "{wordToGuess}"!</p>}
-            {gameStatus === 'lost' && <p className="text-red-500 font-bold text-lg mt-4 animate-scale-in">Round over! The word was "{wordToGuess}"!</p>}
+            {gameStatus === 'won' && <p className="text-green-500 font-bold text-lg mt-4 animate-scale-in">You won this round! The word was "{wordToGuess?.toUpperCase()}"!</p>}
+            {gameStatus === 'lost' && <p className="text-red-500 font-bold text-lg mt-4 animate-scale-in">Round over! The word was "{wordToGuess?.toUpperCase()}"!</p>}
             {finalMessage && <p className="text-blue-500 font-bold text-lg mt-4 animate-scale-in">{finalMessage}</p>}
         </div>
     );
