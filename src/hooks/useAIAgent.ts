@@ -90,7 +90,11 @@ export const useAIAgent = (gameLogic: any, options?: AIAgentConversationOptions)
       }
     },
     getGameStatus: () => {
-      const { wordToGuess, gameStatus, guessedWords, currentWord, roundNumber, totalScore } = gameStateRef.current;
+      const { wordToGuess, gameStatus, guessedWords, currentWord, roundNumber, totalScore, matchId, showLeaderboardDisplay } = gameStateRef.current;
+
+      if (showLeaderboardDisplay) {
+        return `The user is viewing the leaderboard. Say "Thanks for playin', and have yourself a mighty fine day!" and then hang up. [system: end_call]`;
+      }
 
       if (!matchId) {
         return "The game hasn't started yet. The user needs to say 'start game'.";
